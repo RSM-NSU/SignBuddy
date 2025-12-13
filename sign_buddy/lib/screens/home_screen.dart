@@ -31,10 +31,9 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
 
-            //First Child of Column
             Lottie.asset(
               'assets/animations/Handshake Loop.json',
-              width: 200, height: 200,
+              width: 150, height: 150,
               fit: BoxFit.cover,
               repeat: true,
             ),
