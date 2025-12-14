@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:lottie/lottie.dart';
@@ -12,9 +13,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 8), () {
+    checkLogin();
+  }
+
+
+  void checkLogin() async {
+    await Future.delayed(Duration(seconds: 3));
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
       Navigator.pushReplacementNamed(context, '/home');
-    });
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

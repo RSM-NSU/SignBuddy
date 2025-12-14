@@ -22,3 +22,8 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+dependencies {
+    classpath("com.android.tools.build:gradle:7.3.1")
+    classpath("com.google.gms:google-services:4.3.15")
+}
