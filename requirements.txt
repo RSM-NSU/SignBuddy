@@ -3,3 +3,5 @@ tensorflow==2.18.0
 tflite-runtime==2.14.0
 opencv-python==4.7.0.72
 mediapipe
+jupyter
+ipykernel
