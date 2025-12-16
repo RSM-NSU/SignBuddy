@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
-
 class CameraScreen extends StatefulWidget {
   @override
-  _CameraScreenState createState() => _CameraScreenState();
+  State<CameraScreen> createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
+  bool isCameraReady = false;
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    initCamera();
   }
 
-  void _initCamera() async {
+  Future<void> initCamera() async {
     final cameras = await availableCameras();
-    _controller = CameraController(cameras.first, ResolutionPreset.medium);
-    setState(() {});
+    _controller = CameraController(
+      cameras.first,
+      ResolutionPreset.medium,
+    );
+
+    await _controller!.initialize(); // 🔴 THIS WAS MISSING
+
+    setState(() {
+      isCameraReady = true;
+    });
   }
 
   @override
@@ -32,12 +40,12 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Live Camerastar📸'),
+        title: Text('Camera'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: _controller == null || !_controller!.value.isInitialized
-          ? Center(child: CircularProgressIndicator())
-          : CameraPreview(_controller!),
+      body: isCameraReady
+          ? CameraPreview(_controller!)
+          : Center(child: CircularProgressIndicator()),
     );
   }
 }
