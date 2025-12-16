@@ -7,6 +7,7 @@ import 'screens/splash_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/login_screen.dart';
 import 'firebase_options.dart';
+import 'screens/forget_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,7 @@ class SignBuddyApp extends StatelessWidget {
         '/history': (context) => HistoryScreen(),
         '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
+        '/forget':(context)=>ForgotPasswordScreen(),
       },
     );
   }

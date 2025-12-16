@@ -15,17 +15,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? emailValidate(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Enter email';
+      return 'Email Required';
     }
-    if (!value.contains('@')) {
-      return 'Enter valid email';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Enter a valid email';
     }
     return null;
   }
 
   String? passwordValidate(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Enter password';
+      return 'Password Required';
     }
     if (value.length < 8) {
       return 'Minimum 8 characters';
@@ -50,9 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
           icon: Icon(Icons.check_circle, color: Colors.white),
         ).show(context);
 
-        // goes to Home after login
         Navigator.pushReplacementNamed(context, '/home');
-
       } catch (e) {
         Flushbar(
           title: 'Login Failed',
@@ -66,82 +64,112 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sign Buddy Login'),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+      backgroundColor: Colors.grey[100],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
 
-              TextFormField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'example@gmail.com',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                Text(
+                  'Sign Buddy',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple),
+                ),
+                SizedBox(height: 40),
+
+
+                TextFormField(
+                  controller: emailController,
+                  validator: emailValidate,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'example@gmail.com',
+                    prefixIcon: Icon(Icons.email),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
                 ),
-                validator: emailValidate,
-              ),
+                SizedBox(height: 20),
 
-              SizedBox(height: 20),
 
-              TextFormField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter password',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                TextFormField(
+                  controller: passwordController,
+                  validator: passwordValidate,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'Enter your password',
+                    prefixIcon: Icon(Icons.lock),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
                 ),
-                obscureText: true,
-                validator: passwordValidate,
-              ),
+                SizedBox(height: 10),
 
-              SizedBox(height: 30),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: loginUser,
-                  child: Text('Login', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-
-              SizedBox(height: 15),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Don't have an account? "),
-                  TextButton(
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
+                      Navigator.pushNamed(context, '/forget');
                     },
-                    child: Text(
-                      'Signup',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
+                    child: Text('Forgot Password?',
+                        style: TextStyle(color: Colors.deepPurple)),
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed:() {
+                  loginUser();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: Colors.deepPurple,
+                  ),
+                  child: Text(
+                    'Login',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+                SizedBox(height: 20),
+
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Don't have an account? "),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/signup');
+                      },
+                      child: Text('Sign Up',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple)),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

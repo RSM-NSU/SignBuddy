@@ -16,16 +16,21 @@ class _SignupScreenState extends State<SignupScreen> {
   final confirmPasswordController = TextEditingController();
   final phoneController = TextEditingController();
   final ageController = TextEditingController();
-  final notesController = TextEditingController();
 
-  String? nameValidate(String? value) =>
-      value == null || value.isEmpty ? 'Enter name' : null;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
-  String? emailValidate(String? value) =>
-      value != null && value.contains('@') ? null : 'Enter valid email';
+  String? nameValidate(String? value) => value == null || value.isEmpty ? 'Enter name' : null;
+
+  String? emailValidate(String? value) {
+    if (value == null || value.isEmpty) return 'Email Required';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Enter a valid email';
+    return null;
+  }
 
   String? passwordValidate(String? value) =>
-      value != null && value.length >= 8 ? null : 'Min 8 characters';
+      value != null && value.length >= 8 ? null : 'Minimum 8 characters';
 
   String? confirmPasswordValidate(String? value) =>
       value == passwordController.text ? null : 'Password not match';
@@ -36,37 +41,31 @@ class _SignupScreenState extends State<SignupScreen> {
   String? ageValidate(String? value) =>
       value != null && int.tryParse(value) != null ? null : 'Enter valid age';
 
-  void clearForm() {
-    nameController.clear();
-    emailController.clear();
-    passwordController.clear();
-    confirmPasswordController.clear();
-    phoneController.clear();
-    ageController.clear();
-    notesController.clear();
-  }
 
   void submitForm() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       try {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
         );
 
+        setState(() => _isLoading = false);
+
         Flushbar(
           title: 'Success',
           message: 'Signup completed for ${nameController.text}',
           duration: Duration(seconds: 3),
           backgroundColor: Colors.green,
-          margin: EdgeInsets.all(8),
-          borderRadius: BorderRadius.circular(12),
           flushbarPosition: FlushbarPosition.TOP,
           icon: Icon(Icons.check_circle, color: Colors.white),
         ).show(context);
 
-        Navigator.pushReplacementNamed(context, '/login'); // Go to login
+        Navigator.pushReplacementNamed(context, '/login');
       } catch (e) {
+        setState(() => _isLoading = false);
+
         Flushbar(
           title: 'Error',
           message: e.toString(),
@@ -79,172 +78,183 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  void validateAndPreview() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text('Preview'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Name: ${nameController.text}'),
-              Text('Email: ${emailController.text}'),
-              Text('Phone: ${phoneController.text}'),
-              Text('Age: ${ageController.text}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
-            )
-          ],
-        ),
-      );
-    }
+  void clearForm() {
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    phoneController.clear();
+    ageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text('Sign Buddy - Signup'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          Form(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text(
+                  'Create Account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                ),
+                SizedBox(height: 32),
+
+
                 TextFormField(
                   controller: nameController,
+                  validator: nameValidate,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    hintText: 'Enter your name',
                     prefixIcon: Icon(Icons.person),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
-                  validator: nameValidate,
                 ),
                 SizedBox(height: 16),
+
 
                 TextFormField(
                   controller: emailController,
+                  validator: emailValidate,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    hintText: 'example@gmail.com',
                     prefixIcon: Icon(Icons.email),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
-                  validator: emailValidate,
                 ),
                 SizedBox(height: 16),
+
 
                 TextFormField(
                   controller: passwordController,
+                  validator: passwordValidate,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    hintText: 'At least 8 characters',
                     prefixIcon: Icon(Icons.lock),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ),
-                  obscureText: true,
-                  validator: passwordValidate,
                 ),
                 SizedBox(height: 16),
 
+
                 TextFormField(
                   controller: confirmPasswordController,
+                  validator: confirmPasswordValidate,
+                  obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    hintText: 'Re-enter password',
                     prefixIcon: Icon(Icons.lock_outline),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
                     ),
                   ),
-                  obscureText: true,
-                  validator: confirmPasswordValidate,
                 ),
                 SizedBox(height: 16),
 
                 TextFormField(
                   controller: phoneController,
+                  validator: phoneValidate,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Phone',
-                    hintText: '03060000000',
                     prefixIcon: Icon(Icons.call),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: phoneValidate,
                 ),
                 SizedBox(height: 16),
+
 
                 TextFormField(
                   controller: ageController,
+                  validator: ageValidate,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Age',
-                    hintText: '18',
                     prefixIcon: Icon(Icons.cake),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: ageValidate,
                 ),
+                SizedBox(height: 32),
+
+                ElevatedButton(
+                  onPressed: _isLoading ? null : submitForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Signup', style: TextStyle(fontSize: 18, color: Colors.white)),
+                ),
+
                 SizedBox(height: 16),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: submitForm,
-                      child: Text('Signup'),
-                    ),
-                    ElevatedButton(
-                      onPressed: validateAndPreview,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                      ),
-                      child: Text('Preview'),
-                    ),
+                    Text("Already have an account? "),
                     TextButton(
-                      onPressed: clearForm,
-                      child: Text('Clear'),
-                    ),
+                      onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                      child: Text('Login', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                    )
                   ],
-                ),
-                SizedBox(height: 20),
-
-                TextField(
-                  controller: notesController,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    labelText: 'Notes (optional)',
-                    hintText: 'Any extra information',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

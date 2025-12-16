@@ -1,9 +1,11 @@
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
 }
+
 
 android {
     namespace = "com.example.sign_buddy"
@@ -39,4 +41,3 @@ flutter {
     source = "../.."
 }
 
-apply(plugin = "com.google.gms.google-services")
