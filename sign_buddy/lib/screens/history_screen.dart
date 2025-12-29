@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class HistoryScreen extends StatelessWidget {
-  // Dummy history data
+
   final List<String> historyList = [
     'HELLO - 10:30 AM',
     'THANK YOU - 11:15 AM',
@@ -16,7 +16,7 @@ class HistoryScreen extends StatelessWidget {
         backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding:  EdgeInsets.all(15.0),
         child: ListView.builder(
           itemCount: historyList.length,
           itemBuilder: (context, index) {
@@ -24,7 +24,7 @@ class HistoryScreen extends StatelessWidget {
               elevation: 3,
               margin: EdgeInsets.symmetric(vertical: 8),
               child: Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding:  EdgeInsets.all(15.0),
                 child: Text(
                   historyList[index],
                   style: TextStyle(fontSize: 18, color: Colors.deepPurple[900]),

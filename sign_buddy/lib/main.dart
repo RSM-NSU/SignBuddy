@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sign_buddy/screens/edit_profile_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/camera_screen.dart';
 import 'screens/history_screen.dart';
@@ -32,6 +33,8 @@ class SignBuddyApp extends StatelessWidget {
         '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
         '/forget':(context)=>ForgotPasswordScreen(),
+        '/edit':(context)=>EditProfileScreen(),
+
       },
     );
   }
