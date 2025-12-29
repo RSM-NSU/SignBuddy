@@ -23,7 +23,11 @@ class _CameraScreenState extends State<CameraScreen> {
       ResolutionPreset.medium,
     );
 
+<<<<<<< HEAD
     await _controller!.initialize();
+=======
+    await _controller!.initialize(); 
+>>>>>>> 32b6d689484653ba9381b238060274118f3aaa31
 
     setState(() {
       isCameraReady = true;
