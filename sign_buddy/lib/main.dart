@@ -9,16 +9,26 @@ import 'screens/signup_screen.dart';
 import 'screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'screens/forget_screen.dart';
+import 'app_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(SignBuddyApp());
+  runApp(
+    ValueListenableBuilder<bool>(
+      valueListenable: AppState.isDark,
+      builder: (context, isDark, _) {
+        return SignBuddyApp(isDark: isDark);
+      },
+    ), );
 }
 
 class SignBuddyApp extends StatelessWidget {
+  final bool isDark;
+
+  const SignBuddyApp({super.key,required this.isDark});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

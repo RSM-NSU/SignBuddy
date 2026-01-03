@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sign_buddy/app_state.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool isDark = AppState.isDark.value;
   @override
   void initState() {
     super.initState();
@@ -32,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: isDark ?  Color(0xFF212842):Color(0xFFF0E7D5),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -41,9 +43,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
             Text(
               'Sign Buddy',
-              style: GoogleFonts.permanentMarker(
+              style: TextStyle(
                 fontSize: 50,
-                color: Colors.black,
+                color: isDark ?  Color(0xFFF0E7D5):Color(0xFF212842),
                 letterSpacing: 1.5,
               ),
             ),
@@ -52,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
               'Sign to Text & Speech Translator',
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.black54,
+                color: isDark ?  Color(0xFFF0E7D5):Color(0xFF212842),
               ),
             ),
             SizedBox(height: 10,),

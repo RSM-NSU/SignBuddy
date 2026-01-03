@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:sign_buddy/app_state.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool isDark = AppState.isDark.value;
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -90,10 +92,10 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5),
       appBar: AppBar(
-        title: Text('Sign Buddy - Signup'),
-        backgroundColor: Colors.deepPurple,
+        title: Text('Sign Buddy - Signup',style: TextStyle(color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842)),),
+        backgroundColor: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -106,7 +108,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Text(
                   'Create Account',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842)),
                 ),
                 SizedBox(height: 32),
 
@@ -116,7 +118,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: nameValidate,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person),
+                    prefixIcon: Icon(Icons.person,color: isDark?Color(0xFFF0E7D5):Color(0xFF212842),),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -133,7 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                    prefixIcon: Icon(Icons.email,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -150,7 +152,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: Icon(Icons.lock,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -175,7 +177,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -199,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Phone',
-                    prefixIcon: Icon(Icons.call),
+                    prefixIcon: Icon(Icons.call,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -216,7 +218,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Age',
-                    prefixIcon: Icon(Icons.cake),
+                    prefixIcon: Icon(Icons.cake,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -230,13 +232,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: _isLoading ? null : submitForm,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: isDark ? Color(0xFFF0E7D5):Color(0xFF212842),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Signup', style: TextStyle(fontSize: 18, color: Colors.white)),
+                      ? CircularProgressIndicator(color: isDark ? Color(0xFF212842): Color(0xFFF0E7D5))
+                      : Text('Signup', style: TextStyle(fontSize: 18, color: isDark ? Color(0xFF212842): Color(0xFFF0E7D5))),
                 ),
 
                 SizedBox(height: 16),
@@ -247,7 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Text("Already have an account? "),
                     TextButton(
                       onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                      child: Text('Login', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                      child: Text('Login', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842) )),
                     )
                   ],
                 ),
