@@ -6,13 +6,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_buddy/app_state.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isDark = AppState.isDark.value;
   File? profileImage;
 
   @override
@@ -24,14 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isDark = prefs.getBool('isDark') ?? false;
-    });
+    AppState.isDark.value = prefs.getBool('isDark') ?? false;
+    setState(() {});
   }
 
   Future<void> loadProfileImage() async {
     final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString('profileImage');
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final uid = user.uid;
+    final path = prefs.getString('profileImage_$uid');
+
     if (path != null) {
       setState(() {
         profileImage = File(path);
@@ -39,19 +44,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
   Future<void> pickProfileImage() async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('profileImage', image.path);
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) return;
+
+      final uid = user.uid;
+
+      await prefs.setString('profileImage_$uid', image.path);
 
       setState(() {
         profileImage = File(image.path);
       });
     }
   }
+
 
   void openLearnASL() async {
     final Uri url = Uri.parse('https://www.lifeprint.com/');
@@ -66,128 +79,227 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppState.isDark.value
+            ?  Color(0xFF212842)
+            :  Color(0xFFF0E7D5),
         title: Text(
           'Sign Buddy',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDark ?  Color(0xFFF0E7D5): Color(0xFF212842)),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppState.isDark.value
+                ?  Color(0xFFF0E7D5)
+                :  Color(0xFF212842),
+          ),
         ),
-        backgroundColor: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5),
       ),
 
-      backgroundColor: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5),
+      backgroundColor: AppState.isDark.value
+          ?  Color(0xFF212842)
+          :  Color(0xFFF0E7D5),
 
       drawer: Drawer(
-        backgroundColor: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5),
+        backgroundColor: AppState.isDark.value
+            ?  Color(0xFF212842)
+            :  Color(0xFFF0E7D5),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
 
             UserAccountsDrawerHeader(
-              accountName: Text(user?.displayName ?? 'User',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
-              accountEmail: Text(user?.email ?? '', style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              decoration: BoxDecoration(
+                color: AppState.isDark.value
+                    ?  Color(0xFF212842)
+                    :  Color(0xFFF0E7D5),
+              ),
+              accountName: Text(
+                user?.displayName ?? 'User',
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
+                ),
+              ),
+              accountEmail: Text(
+                user?.email ?? '',
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
+                ),
+              ),
               currentAccountPicture: GestureDetector(
                 onTap: pickProfileImage,
                 child: CircleAvatar(
-                  backgroundColor: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),
+                  backgroundColor: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
                   backgroundImage:
                   profileImage != null ? FileImage(profileImage!) : null,
                   child: profileImage == null
-                      ? Icon(Icons.person, size: 40, color: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5))
+                      ? Icon(
+                    Icons.person,
+                    size: 40,
+                    color: AppState.isDark.value
+                        ?  Color(0xFF212842)
+                        :  Color(0xFFF0E7D5),
+                  )
                       : null,
                 ),
               ),
-              decoration: BoxDecoration(color: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5)),
             ),
 
             ListTile(
-              leading: Icon(Icons.person,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),),
-              title: Text('Edit Profile',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.person,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Edit Profile',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               onTap: () async {
-
                 final result = await Navigator.pushNamed(context, '/edit');
                 if (result == true) {
                   loadProfileImage();
-                  setState(() {});
                 }
               },
             ),
 
             ListTile(
-              leading: Icon(Icons.lock,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('Change Password',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
-              onTap: () {
-                Navigator.pushNamed(context, '/forget');
-              },
+              leading: Icon(Icons.lock,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Change Password',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
+              onTap: () => Navigator.pushNamed(context, '/forget'),
             ),
 
             ListTile(
-              leading: Icon(Icons.menu_book,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('Learn Sign Language',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.menu_book,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Learn Sign Language',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               onTap: openLearnASL,
             ),
 
             ListTile(
-              leading: Icon(Icons.history,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('History',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
-              onTap: () {
-                Navigator.pushNamed(context, '/history');
-              },
+              leading: Icon(Icons.history,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'History',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
+              onTap: () => Navigator.pushNamed(context, '/history'),
             ),
 
             ListTile(
-              leading: Icon(Icons.help,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('Help & Support',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.help,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Help & Support',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
-                    title: Text('Help',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
-                    content: Text('Email us at saudmasood010@gmail.com',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+                    title:  Text('Help'),
+                    content:  Text(
+                        'Email us at saudmasood010@gmail.com'),
                   ),
                 );
               },
             ),
 
             ListTile(
-              leading: Icon(Icons.info,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('About App',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.info,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'About App',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (_) => AlertDialog(
-                    title: Text('Sign Buddy',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+                  builder: (_) =>  AlertDialog(
+                    title: Text('Sign Buddy'),
                     content: Text(
-                      'Sign Buddy converts sign language into text and speech.',
-                      style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-                    ),
+                        'Sign Buddy converts sign language into text and speech.'),
                   ),
                 );
               },
             ),
 
-            Divider(),
+             Divider(),
 
             ListTile(
-              leading: Icon(Icons.brightness_6,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('Dark / Light Theme',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.brightness_6,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Dark / Light Theme',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               trailing: Switch(
-                activeColor: isDark ?  Color(0xFFF0E7D5): Color(0xFF212842),
-                value: isDark,
+                value: AppState.isDark.value,
                 onChanged: (val) async {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('isDark', val);
                   setState(() {
-                    isDark = val;
                     AppState.isDark.value = val;
-                  }
-                  );
-
+                  });
                 },
               ),
             ),
 
             ListTile(
-              leading: Icon(Icons.logout,color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
-              title: Text('Sign Out',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
+              leading: Icon(Icons.logout,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842)),
+              title: Text(
+                'Sign Out',
+                style: TextStyle(
+                    color: AppState.isDark.value
+                        ?  Color(0xFFF0E7D5)
+                        :  Color(0xFF212842)),
+              ),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacementNamed(context, '/login');
@@ -200,8 +312,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.all(20),
-          color: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5),
+          padding:  EdgeInsets.all(20),
+          color: AppState.isDark.value
+              ?  Color(0xFF212842)
+              :  Color(0xFFF0E7D5),
           child: Column(
             children: [
 
@@ -211,58 +325,74 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 70,
               ),
 
-              SizedBox(height: 20),
+               SizedBox(height: 20),
 
               Text(
                 'Welcome to Sign Buddy',
                 style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color:isDark ?  Color(0xFFF0E7D5): Color(0xFF212842)),
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
+                ),
               ),
 
-              SizedBox(height: 10),
+               SizedBox(height: 10),
 
               Text(
                 'Sign to Text & Speech Translator',
-                style: TextStyle(fontSize: 16, color:isDark ?  Color(0xFFF0E7D5): Color(0xFF212842)),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
+                ),
               ),
 
-              SizedBox(height: 50),
+               SizedBox(height: 40),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 60),
-                  backgroundColor:
-                  isDark ? Color(0xFFF0E7D5): Color(0xFF212842),
+                  minimumSize:  Size(double.infinity, 60),
+                  backgroundColor: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/camera');
-                },
+                onPressed: () => Navigator.pushNamed(context, '/camera'),
                 child: Text(
                   'Start Translation',
-                  style: TextStyle(fontSize: 20, color:isDark ?  Color(0xFF212842): Color(0xFFF0E7D5) ),
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: AppState.isDark.value
+                        ?  Color(0xFF212842)
+                        :  Color(0xFFF0E7D5),
+                  ),
                 ),
               ),
 
-              SizedBox(height: 20),
+               SizedBox(height: 20),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 60),
-                  backgroundColor:
-                  isDark ? Color(0xFFF0E7D5): Color(0xFF212842),
+                  minimumSize:  Size(double.infinity, 60),
+                  backgroundColor: AppState.isDark.value
+                      ?  Color(0xFFF0E7D5)
+                      :  Color(0xFF212842),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/history');
-                },
+                onPressed: () => Navigator.pushNamed(context, '/history'),
                 child: Text(
                   'View History',
-                  style: TextStyle(fontSize: 20, color:isDark ?  Color(0xFF212842): Color(0xFFF0E7D5)),
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: AppState.isDark.value
+                        ?  Color(0xFF212842)
+                        :  Color(0xFFF0E7D5),
+                  ),
                 ),
               ),
 
-              SizedBox(height: 30),
+               SizedBox(height: 30),
 
               InkWell(
                 onTap: openLearnASL,
@@ -273,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 170,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        image: DecorationImage(
+                        image:  DecorationImage(
                           image: AssetImage('assets/images/asllearn.jpg'),
                           fit: BoxFit.cover,
                         ),
@@ -284,8 +414,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
+                        padding:  EdgeInsets.all(12),
+                        decoration:  BoxDecoration(
                           color: Colors.black54,
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(16),
@@ -293,15 +423,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: Row(
-                          children: [
+                          children:  [
                             Icon(Icons.school, color: Colors.white),
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Learn ASL Signs\nTap to explore alphabets & words',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -311,7 +442,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
             ],
           ),
         ),

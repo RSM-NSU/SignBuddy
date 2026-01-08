@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:sign_buddy/app_state.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -20,7 +21,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void resetPassword() async {
-
     if (!_formKey.currentState!.validate()) return;
 
     String email = emailController.text.trim();
@@ -61,10 +61,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppState.isDark.value
+          ? Color(0xFF212842)
+          : Color(0xFFF0E7D5),
+
       appBar: AppBar(
-        title: Text('Forgot Password'),
-        backgroundColor: Colors.deepPurple,
+        title: Text(
+          'Forgot Password',
+          style: TextStyle(
+            color: AppState.isDark.value
+                ? Color(0xFFF0E7D5)
+                : Color(0xFF212842),
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: AppState.isDark.value
+              ? Color(0xFFF0E7D5)
+              : Color(0xFF212842),
+        ),
+        backgroundColor: AppState.isDark.value
+            ? Color(0xFF212842)
+            : Color(0xFFF0E7D5),
       ),
+
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Form(
@@ -72,26 +91,76 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+
               Text(
                 'Enter your email to reset password',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppState.isDark.value
+                      ? Color(0xFFF0E7D5)
+                      : Color(0xFF212842),
+                ),
               ),
+
               SizedBox(height: 15),
+
               TextFormField(
                 controller: emailController,
+                validator: emailValidate,
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ? Color(0xFFF0E7D5)
+                      : Color(0xFF212842),
+                ),
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: AppState.isDark.value
+                        ? Color(0xFFF0E7D5)
+                        : Color(0xFF212842),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.email,
+                    color: AppState.isDark.value
+                        ? Color(0xFFF0E7D5)
+                        : Color(0xFF212842),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppState.isDark.value
+                          ? Color(0xFFF0E7D5)
+                          : Color(0xFF212842),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppState.isDark.value
+                          ? Color(0xFFF0E7D5)
+                          : Color(0xFF212842),
+                    ),
+                  ),
                 ),
-                validator: emailValidate,
               ),
+
               SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppState.isDark.value
+                        ? Color(0xFFF0E7D5)
+                        : Color(0xFF212842),
+                  ),
                   onPressed: resetPassword,
-                  child: Text('Send Reset Email'),
+                  child: Text(
+                    'Send Reset Email',
+                    style: TextStyle(
+                      color: AppState.isDark.value
+                          ? Color(0xFF212842)
+                          : Color(0xFFF0E7D5),
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -4,14 +4,11 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:sign_buddy/app_state.dart';
 
 class LoginScreen extends StatefulWidget {
-
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isDark = AppState.isDark.value;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -72,7 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5),
+      backgroundColor: AppState.isDark.value
+          ? Color(0xFF212842)
+          : Color(0xFFF0E7D5),
+
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -86,12 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Sign Buddy',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: AppState.isDark.value
+                        ? Color(0xFFF0E7D5)
+                        : Color(0xFF212842),
+                  ),
                 ),
-                SizedBox(height: 40),
 
+                SizedBox(height: 40),
 
                 TextFormField(
                   controller: emailController,
@@ -100,16 +103,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'example@gmail.com',
-                    prefixIcon: Icon(Icons.email, color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),),
+                    prefixIcon: Icon(
+                      Icons.email,
+                      color: AppState.isDark.value
+                          ? Color(0xFFF0E7D5)
+                          : Color(0xFF212842),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
-                SizedBox(height: 20),
 
+                SizedBox(height: 20),
 
                 TextFormField(
                   controller: passwordController,
@@ -118,14 +127,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     hintText: 'Enter your password',
-                    prefixIcon: Icon(Icons.lock, color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),),
+                    prefixIcon: Icon(
+                      Icons.lock,
+                      color: AppState.isDark.value
+                          ? Color(0xFFF0E7D5)
+                          : Color(0xFF212842),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
+
                 SizedBox(height: 10),
 
                 Align(
@@ -134,45 +150,69 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.pushNamed(context, '/forget');
                     },
-                    child: Text('Forgot Password?',
-                        style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842))),
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: AppState.isDark.value
+                            ? Color(0xFFF0E7D5)
+                            : Color(0xFF212842),
+                      ),
+                    ),
                   ),
                 ),
+
                 SizedBox(height: 20),
 
                 ElevatedButton(
-                  onPressed:() {
-                  loginUser();
-                  },
+                  onPressed: loginUser,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    backgroundColor: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: AppState.isDark.value
+                        ? Color(0xFFF0E7D5)
+                        : Color(0xFF212842),
                   ),
                   child: Text(
                     'Login',
-                    style: TextStyle(fontSize: 18, color: isDark ?  Color(0xFF212842) : Color(0xFFF0E7D5) ),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppState.isDark.value
+                          ? Color(0xFF212842)
+                          : Color(0xFFF0E7D5),
+                    ),
                   ),
                 ),
-                SizedBox(height: 20),
 
+                SizedBox(height: 20),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account? ",style : TextStyle(
-                    color: isDark ? Color(0xFFF0E7D5): Color(0xFF212842))),
+                    Text(
+                      "Don't have an account? ",
+                      style: TextStyle(
+                        color: AppState.isDark.value
+                            ? Color(0xFFF0E7D5)
+                            : Color(0xFF212842),
+                      ),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/signup');
                       },
-                      child: Text('Sign Up',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Color(0xFFF0E7D5): Color(0xFF212842)),
-                    )
-                    )],
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppState.isDark.value
+                              ? Color(0xFFF0E7D5)
+                              : Color(0xFF212842),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
