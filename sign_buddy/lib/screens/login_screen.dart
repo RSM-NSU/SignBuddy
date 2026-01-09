@@ -12,7 +12,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isDark = AppState.isDark.value;
-
+  static final LightColor = AppState.LightColor;
+  static final DarkColor = AppState.DarkColor;
   final _formKey = GlobalKey<FormState>();
 
   final emailController = TextEditingController();
@@ -72,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5),
+      backgroundColor: isDark ? DarkColor: LightColor,
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -88,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),
+                      color: isDark ? LightColor :DarkColor),
                 ),
                 SizedBox(height: 40),
 
@@ -100,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'example@gmail.com',
-                    prefixIcon: Icon(Icons.email, color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),),
+                    prefixIcon: Icon(Icons.email, color: isDark ? LightColor :DarkColor,),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -118,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     hintText: 'Enter your password',
-                    prefixIcon: Icon(Icons.lock, color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),),
+                    prefixIcon: Icon(Icons.lock, color: isDark ? LightColor :DarkColor,),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -135,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.pushNamed(context, '/forget');
                     },
                     child: Text('Forgot Password?',
-                        style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842))),
+                        style: TextStyle(color: isDark ? LightColor :DarkColor)),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -148,11 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                    backgroundColor: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842),
+                    backgroundColor: isDark ? LightColor :DarkColor,
                   ),
                   child: Text(
                     'Login',
-                    style: TextStyle(fontSize: 18, color: isDark ?  Color(0xFF212842) : Color(0xFFF0E7D5) ),
+                    style: TextStyle(fontSize: 18, color: isDark ? DarkColor : LightColor ),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -162,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Don't have an account? ",style : TextStyle(
-                    color: isDark ? Color(0xFFF0E7D5): Color(0xFF212842))),
+                    color: isDark ? LightColor:DarkColor)),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/signup');
@@ -170,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text('Sign Up',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Color(0xFFF0E7D5): Color(0xFF212842)),
+                              color: isDark ? LightColor:DarkColor),
                     )
                     )],
                 ),

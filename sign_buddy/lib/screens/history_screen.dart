@@ -3,7 +3,8 @@ import 'package:sign_buddy/app_state.dart';
 class HistoryScreen extends StatelessWidget {
 
   bool isDark = AppState.isDark.value;
-
+  static final LightColor = AppState.LightColor;
+  static final DarkColor = AppState.DarkColor;
   final List<String> historyList = [
     'HELLO - 10:31 AM',
     'THANK YOU - 11:15 AM',
@@ -13,10 +14,11 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  Color(0xFF212842):Color(0xFFF0E7D5),
+      backgroundColor: isDark ? DarkColor:LightColor,
       appBar: AppBar(
-        title: Text('History',style: TextStyle(color: isDark ? Color(0xFFF0E7D5) : Color(0xFF212842)),),
-        backgroundColor: isDark ?  Color(0xFF212842):Color(0xFFF0E7D5),
+        iconTheme: IconThemeData(color: isDark ? LightColor: DarkColor),
+        title: Text('History',style: TextStyle(color: isDark ? LightColor :DarkColor),),
+        backgroundColor: isDark ? DarkColor : LightColor,
       ),
       body: Padding(
         padding:  EdgeInsets.all(15.0),
@@ -26,12 +28,12 @@ class HistoryScreen extends StatelessWidget {
             return Card(
               elevation: 3,
               margin: EdgeInsets.symmetric(vertical: 8),
-              color: isDark ?  Color(0xFFF0E7D5):Color(0xFF212842),
+              color: isDark ?  LightColor:DarkColor,
               child: Padding(
                 padding:  EdgeInsets.all(15.0),
                 child: Text(
                   historyList[index],
-                  style: TextStyle(fontSize: 18, color: isDark ? Color(0xFF212842):Color(0xFFF0E7D5)),
+                  style: TextStyle(fontSize: 18, color: isDark ?DarkColor:LightColor),
                 ),
               ),
             );

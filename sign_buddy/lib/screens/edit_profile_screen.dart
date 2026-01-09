@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:sign_buddy/app_state.dart';
 class EditProfileScreen extends StatefulWidget {
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  final bool isDark = AppState.isDark.value;
+  final LightColor = AppState.LightColor;
+  final DarkColor = AppState.DarkColor;
+
   File? profileImage;
   final nameController = TextEditingController();
 
@@ -47,6 +51,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> saveProfile() async {
+
+
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
@@ -61,8 +67,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
-        backgroundColor: Colors.deepPurple,
+        title: Text('Edit Profile',style: TextStyle(color: isDark ? LightColor:DarkColor),),
+        backgroundColor: isDark ? DarkColor : LightColor,
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
@@ -95,7 +101,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             ElevatedButton(
               onPressed: saveProfile,
-              child: Text('Save Profile'),
+              style: ElevatedButton.styleFrom(backgroundColor: isDark ? DarkColor : LightColor),
+              child: Text('Save Profile',style: TextStyle(color: isDark ? LightColor:DarkColor),),
             ),
           ],
         ),

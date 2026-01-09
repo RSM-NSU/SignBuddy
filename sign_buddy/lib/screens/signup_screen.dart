@@ -11,7 +11,8 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isDark = AppState.isDark.value;
-
+  static final LightColor = AppState.LightColor;
+  static final DarkColor = AppState.DarkColor;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -92,10 +93,11 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ? Color(0xFF212842) : Color(0xFFF0E7D5),
+      backgroundColor: isDark ?DarkColor : LightColor,
       appBar: AppBar(
-        title: Text('Sign Buddy - Signup',style: TextStyle(color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842)),),
-        backgroundColor: isDark ?  Color(0xFF212842): Color(0xFFF0E7D5),
+        title: Text('Sign Buddy - Signup',style: TextStyle(color: isDark ? LightColor:DarkColor),),
+        backgroundColor: isDark ? DarkColor: LightColor,
+        iconTheme: IconThemeData(color: isDark ? LightColor:DarkColor),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -108,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Text(
                   'Create Account',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842)),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: isDark ? LightColor:DarkColor),
                 ),
                 SizedBox(height: 32),
 
@@ -118,7 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: nameValidate,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person,color: isDark?Color(0xFFF0E7D5):Color(0xFF212842),),
+                    prefixIcon: Icon(Icons.person,color: isDark?LightColor:DarkColor,),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -135,7 +137,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
+                    prefixIcon: Icon(Icons.email,color : isDark?LightColor:DarkColor),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -152,7 +154,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
+                    prefixIcon: Icon(Icons.lock,color : isDark?LightColor:DarkColor),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -177,7 +179,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock_outline,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
+                    prefixIcon: Icon(Icons.lock_outline,color : isDark?LightColor:DarkColor),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -201,7 +203,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Phone',
-                    prefixIcon: Icon(Icons.call,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
+                    prefixIcon: Icon(Icons.call,color : isDark?LightColor:DarkColor),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -218,7 +220,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Age',
-                    prefixIcon: Icon(Icons.cake,color : isDark?Color(0xFFF0E7D5):Color(0xFF212842)),
+                    prefixIcon: Icon(Icons.cake,color : isDark?LightColor:DarkColor),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -232,13 +234,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: _isLoading ? null : submitForm,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: isDark ? Color(0xFFF0E7D5):Color(0xFF212842),
+                    backgroundColor: isDark ? LightColor:DarkColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: isDark ? Color(0xFF212842): Color(0xFFF0E7D5))
-                      : Text('Signup', style: TextStyle(fontSize: 18, color: isDark ? Color(0xFF212842): Color(0xFFF0E7D5))),
+                      ? CircularProgressIndicator(color: isDark ?DarkColor: LightColor)
+                      : Text('Signup', style: TextStyle(fontSize: 18, color: isDark ?DarkColor: LightColor)),
                 ),
 
                 SizedBox(height: 16),
@@ -246,10 +248,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Already have an account? "),
+                    Text("Already have an account? ", style: TextStyle(color: isDark ? LightColor:DarkColor),),
                     TextButton(
                       onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                      child: Text('Login', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Color(0xFFF0E7D5):Color(0xFF212842) )),
+                      child: Text('Login', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? LightColor:DarkColor )),
                     )
                   ],
                 ),

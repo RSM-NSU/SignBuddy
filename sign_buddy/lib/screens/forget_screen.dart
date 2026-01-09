@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:sign_buddy/app_state.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -8,6 +9,10 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final bool isDark = AppState.isDark.value;
+  final LightColor = AppState.LightColor;
+  final DarkColor = AppState.DarkColor;
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
 
@@ -61,9 +66,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: isDark ? DarkColor: LightColor,
       appBar: AppBar(
-        title: Text('Forgot Password'),
-        backgroundColor: Colors.deepPurple,
+        iconTheme: IconThemeData(color: isDark ? LightColor:DarkColor),
+        title: Text('Forgot Password',style: TextStyle(color: isDark ? LightColor:DarkColor),),
+        backgroundColor: isDark ? DarkColor: LightColor,
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -74,15 +81,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               Text(
                 'Enter your email to reset password',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 18,color: isDark ? LightColor:DarkColor),
               ),
               SizedBox(height: 15),
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(Icons.email,color: isDark ? LightColor: DarkColor,),
+                  labelStyle: TextStyle(color: isDark? LightColor: DarkColor),
                   border: OutlineInputBorder(),
+
+
                 ),
                 validator: emailValidate,
               ),
@@ -91,7 +101,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: resetPassword,
-                  child: Text('Send Reset Email'),
+                  style: ElevatedButton.styleFrom(backgroundColor: isDark ? LightColor:DarkColor),
+                  child: Text('Send Reset Email',style: TextStyle(color: isDark ? DarkColor:LightColor),),
                 ),
               ),
             ],

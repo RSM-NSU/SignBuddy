@@ -12,6 +12,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool isDark = AppState.isDark.value;
+  static final LightColor = AppState.LightColor;
+  static final DarkColor = AppState.DarkColor;
   @override
   void initState() {
     super.initState();
@@ -34,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  Color(0xFF212842):Color(0xFFF0E7D5),
+      backgroundColor: isDark ? DarkColor:LightColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
               'Sign Buddy',
               style: TextStyle(
                 fontSize: 50,
-                color: isDark ?  Color(0xFFF0E7D5):Color(0xFF212842),
+                color: isDark ?  LightColor:DarkColor,
                 letterSpacing: 1.5,
               ),
             ),
@@ -54,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
               'Sign to Text & Speech Translator',
               style: TextStyle(
                 fontSize: 18,
-                color: isDark ?  Color(0xFFF0E7D5):Color(0xFF212842),
+                color: isDark ?  LightColor:DarkColor,
               ),
             ),
             SizedBox(height: 10,),

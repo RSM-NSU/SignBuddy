@@ -30,7 +30,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   bool isDark = AppState.isDark.value;
-
+  static final LightColor = AppState.LightColor;
+  static final DarkColor = AppState.DarkColor;
   CameraController? _cameraController;
   Interpreter? _interpreter;
   List<CameraDescription>? _cameras;
@@ -387,10 +388,11 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  Color(0xFFF0E7D5): Color(0xFF212842),
+      backgroundColor: isDark ?  LightColor:DarkColor,
       appBar: AppBar(
-        title: Text("CNN Object Detection",style: TextStyle(color: isDark ?  const Color(0xFFF0E7D5): const Color(0xFF212842)),),
-        backgroundColor: isDark ? Color(0xFF212842):Color(0xFFF0E7D5),
+        iconTheme: IconThemeData(color: isDark ?   LightColor : DarkColor),
+        title: Text("CNN Object Detection",style: TextStyle(color: isDark ?   LightColor:DarkColor),),
+        backgroundColor: isDark ?DarkColor:LightColor,
         elevation: 0,
       ),
       body: hasError
@@ -407,7 +409,7 @@ class _CameraScreenState extends State<CameraScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: isDark ?  const Color(0xFFF0E7D5): const Color(0xFF212842),
+            color: isDark ?  LightColor: DarkColor,
           ),
           const SizedBox(height: 20),
           Text(
@@ -544,9 +546,9 @@ class _CameraScreenState extends State<CameraScreen> {
             child: ElevatedButton.icon(
               onPressed: startDetection,
               icon: const Icon(Icons.play_arrow),
-              label: Text("Start Detection",style: TextStyle(color: isDark ?  const Color(0xFF212842):const Color(0xFFF0E7D5)),),
+              label: Text("Start Detection",style: TextStyle(color: isDark ?  DarkColor:LightColor),),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDark ?  Color(0xFFF0E7D5): Color(0xFF212842),
+                backgroundColor: isDark ?  LightColor:DarkColor,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,
