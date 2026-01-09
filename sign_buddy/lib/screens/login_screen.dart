@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? emailValidate(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email Required';
+
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
       return 'Enter a valid email';
