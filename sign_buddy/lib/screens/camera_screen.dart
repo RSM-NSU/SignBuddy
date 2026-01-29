@@ -388,215 +388,123 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ?  LightColor:DarkColor,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: isDark ?   LightColor : DarkColor),
-        title: Text("CNN Object Detection",style: TextStyle(color: isDark ?   LightColor:DarkColor),),
-        backgroundColor: isDark ?DarkColor:LightColor,
-        elevation: 0,
-      ),
-      body: hasError
-          ? _buildErrorView()
-          : isCameraReady
-          ? _buildCameraView()
-          : _buildLoadingView(),
-    );
-  }
+      backgroundColor: isDark ? LightColor : DarkColor,
 
-  Widget _buildLoadingView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            color: isDark ?  LightColor: DarkColor,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            predictionLabel,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+      appBar: AppBar(
+        backgroundColor: isDark ? DarkColor : LightColor,
+        title: Text(
+          "CNN Object Detection",
+          style: TextStyle(color: isDark ? LightColor : DarkColor),
+        ),
+      ),
+
+      // ✅ SIMPLE BODY UI
+      body: hasError
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 60),
+            const SizedBox(height: 10),
+            Text(
+              errorMessage,
+              style: const TextStyle(color: Colors.white),
             ),
-            textAlign: TextAlign.center,
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: initCameraAndModel,
+              child: const Text("Retry"),
+            )
+          ],
+        ),
+      )
+          : !isCameraReady
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: isDark ? LightColor : DarkColor,
+            ),
+            const SizedBox(height: 15),
+            Text(
+              predictionLabel,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      )
+          : Stack(
+        children: [
+
+          // 🔹 CAMERA PREVIEW
+          CameraPreview(_cameraController!),
+
+          // 🔹 BOTTOM RESULT PANEL
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Colors.black.withOpacity(0.7),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    predictionLabel.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 🔹 START BUTTON
+          if (predictionLabel.contains("Tap"))
+            Center(
+              child: ElevatedButton(
+                onPressed: startDetection,
+                child: const Text("Start Detection"),
+              ),
+            ),
+
+          // 🔹 LIVE / IDLE INDICATOR
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isProcessingFrame
+                    ? Colors.green
+                    : Colors.grey,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                isProcessingFrame ? "LIVE" : "IDLE",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 64,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              errorMessage,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  hasError = false;
-                  predictionLabel = "Retrying...";
-                });
-                initCameraAndModel();
-              },
-              child: const Text("Retry"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCameraView() {
-    return Stack(
-      children: [
-        // Camera preview
-        SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: CameraPreview(_cameraController!),
-        ),
-
-        // Prediction overlay
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [
-                  Colors.black.withOpacity(0.8),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  predictionLabel.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Text(
-                      "Confidence: ",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      "${(confidence * 100).toStringAsFixed(1)}%",
-                      style: TextStyle(
-                        color: confidence > 0.5
-                            ? Colors.greenAccent
-                            : Colors.orangeAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: confidence,
-                  backgroundColor: Colors.white24,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    confidence > 0.5
-                        ? Colors.greenAccent
-                        : Colors.orangeAccent,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Start button (tap to begin detection)
-        if (!isProcessingFrame && predictionLabel.contains("Tap to start"))
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: startDetection,
-              icon: const Icon(Icons.play_arrow),
-              label: Text("Start Detection",style: TextStyle(color: isDark ?  DarkColor:LightColor),),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDark ?  LightColor:DarkColor,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-            ),
-          ),
-
-        // Status indicator
-        Positioned(
-          top: 20,
-          right: 20,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: isProcessingFrame
-                  ? Colors.green
-                  : Colors.grey,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  isProcessingFrame ? "LIVE" : "IDLE",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
