@@ -96,6 +96,17 @@ class _SignupScreenState extends State<SignupScreen> {
           : Color(0xFFF0E7D5),
 
       appBar: AppBar(
+        leading: IconButton(
+          color: Colors.black,
+          iconSize: 30,
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/welcome');
+          },
+        ),
         title: Text(
           'Sign Buddy - Signup',
           style: TextStyle(

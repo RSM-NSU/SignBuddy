@@ -72,6 +72,21 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppState.isDark.value
           ? Color(0xFF212842)
           : Color(0xFFF0E7D5),
+      appBar: AppBar(
+        title: Text('Sign Buddy - Login'),
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          color: Colors.black,
+          iconSize: 30,
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/welcome');
+          },
+        ),
+      ),
 
       body: Center(
         child: SingleChildScrollView(

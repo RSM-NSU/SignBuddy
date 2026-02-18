@@ -10,6 +10,8 @@ import 'screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'screens/forget_screen.dart';
 import 'app_state.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/guest_home.dart';
 
 
 
@@ -39,6 +41,8 @@ class SignBuddyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
+        '/welcome': (context) => WelcomeScreen(),
+        '/guest': (context) => GuestHome(),
         '/home': (context) => HomeScreen(),
         '/camera': (context) => CameraScreen(),
         '/history': (context) => HistoryScreen(),
