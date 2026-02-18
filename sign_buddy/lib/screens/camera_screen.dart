@@ -1,9 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:sign_buddy/lib/database/db_helper.dart' ;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:sign_buddy/app_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -40,10 +43,15 @@ class _CameraScreenState extends State<CameraScreen> {
   bool isProcessingFrame = false;
   bool hasError = false;
 
+  DatabaseHelper dbHelper = DatabaseHelper();
+  String lastSavedPrediction = "";
+
+
   static const int inputSize = 224;
   String predictionLabel = "Initializing...";
   double confidence = 0.0;
   String errorMessage = "";
+
 
   // Performance optimization
   int _frameCount = 0;
@@ -60,15 +68,17 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    dbHelper.createDatabase();
     initCameraAndModel();
   }
+
+
 
   Future<void> initCameraAndModel() async {
     setState(() {
       predictionLabel = "Getting cameras...";
     });
 
-    // 1️⃣ Get available cameras
     try {
       _cameras = await availableCameras();
 
@@ -83,7 +93,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       debugPrint("Found ${_cameras!.length} camera(s)");
     } catch (e) {
-      debugPrint("❌ Error getting cameras: $e");
+      debugPrint(" Error getting cameras: $e");
       setState(() {
         hasError = true;
         errorMessage = "Camera access denied or unavailable";
@@ -92,7 +102,6 @@ class _CameraScreenState extends State<CameraScreen> {
       return;
     }
 
-    // 2️⃣ Initialize camera controller
     setState(() {
       predictionLabel = "Initializing camera...";
     });
@@ -100,7 +109,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       _cameraController = CameraController(
         _cameras!.first,
-        ResolutionPreset.low, // ⚡ Changed to low for better performance
+        ResolutionPreset.low,
         enableAudio: false,
       );
 
@@ -113,9 +122,9 @@ class _CameraScreenState extends State<CameraScreen> {
         predictionLabel = "Camera ready! Loading model...";
       });
 
-      debugPrint("✅ Camera initialized successfully");
+      debugPrint(" Camera initialized successfully");
     } catch (e) {
-      debugPrint("❌ Camera init failed: $e");
+      debugPrint(" Camera init failed: $e");
       setState(() {
         hasError = true;
         errorMessage = "Failed to initialize camera: ${e.toString()}";
@@ -124,13 +133,12 @@ class _CameraScreenState extends State<CameraScreen> {
       return;
     }
 
-    // 3️⃣ Load TFLite model (optional - comment out if model not ready)
     try {
       _interpreter = await Interpreter.fromAsset(
         'assets/models/ccn_model.tflite',
       );
 
-      debugPrint("✅ Model loaded successfully");
+      debugPrint(" Model loaded successfully");
       debugPrint("Input shape: ${_interpreter!.getInputTensor(0).shape}");
       debugPrint("Output shape: ${_interpreter!.getOutputTensor(0).shape}");
 
@@ -141,8 +149,7 @@ class _CameraScreenState extends State<CameraScreen> {
       });
 
     } catch (e) {
-      debugPrint("⚠️ Model load failed (this is OK for testing): $e");
-      // Don't set hasError - we can still show camera
+      debugPrint(" Model load failed (this is OK for testing): $e");
       setState(() {
         predictionLabel = "Camera ready (no model loaded)";
       });
@@ -158,11 +165,10 @@ class _CameraScreenState extends State<CameraScreen> {
       predictionLabel = "Running detection...";
     });
 
-    // Start image stream only when user taps
     try {
       _cameraController!.startImageStream(_onCameraFrame);
     } catch (e) {
-      debugPrint("❌ Failed to start image stream: $e");
+      debugPrint(" Failed to start image stream: $e");
       setState(() {
         predictionLabel = "Failed to start detection: $e";
       });
@@ -170,7 +176,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void _onCameraFrame(CameraImage image) {
-    // Skip frames for performance
     _frameCount++;
     if (_frameCount % _frameSkip != 0) {
       return;
@@ -178,7 +183,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
     if (isProcessingFrame || _interpreter == null) return;
 
-    // Throttle processing to max 10 FPS
     final now = DateTime.now();
     if (now.difference(_lastProcessTime).inMilliseconds < 100) {
       return;
@@ -187,7 +191,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
     isProcessingFrame = true;
 
-    // Process frame asynchronously to avoid lag
     Future.microtask(() async {
       if (!mounted) {
         isProcessingFrame = false;
@@ -195,34 +198,54 @@ class _CameraScreenState extends State<CameraScreen> {
       }
 
       try {
-        // Convert camera image to model input
         final input = await _preprocessCameraImage(image);
 
-        // Get output shape from model
         final outputShape = _interpreter!.getOutputTensor(0).shape;
         final numClasses = outputShape[1];
 
-        // Prepare output buffer
         final output = List.filled(numClasses, 0.0).reshape([1, numClasses]);
 
-        // Run inference
         _interpreter!.run(input, output);
 
-        // Get prediction
         final predictions = output[0] as List<double>;
         final maxIndex = predictions.indexOf(predictions.reduce(max));
         final maxConfidence = predictions[maxIndex];
 
         if (mounted) {
+
+          String newPrediction;
+
+          if (maxIndex < labels.length) {
+            newPrediction = labels[maxIndex];
+          } else {
+            newPrediction = "Class $maxIndex";
+          }
+
           setState(() {
-            if (maxIndex < labels.length) {
-              predictionLabel = labels[maxIndex];
-            } else {
-              predictionLabel = "Class $maxIndex";
-            }
+            predictionLabel = newPrediction;
             confidence = maxConfidence;
           });
+
+          //  SAVE TO DATABASE
+          final user = FirebaseAuth.instance.currentUser;
+
+          if (user != null &&
+              maxConfidence > 0.7 &&
+              newPrediction != lastSavedPrediction &&
+              newPrediction != "NOTHING" &&
+              newPrediction != "SPACE") {
+
+            lastSavedPrediction = newPrediction;
+            print("Saving...");
+            await dbHelper.insertHistory(
+              user.uid,
+              newPrediction,
+              maxConfidence,
+              DateTime.now().toIso8601String(), // Better format for DB
+            );
+          }
         }
+
       } catch (e) {
         debugPrint("Inference error: $e");
       } finally {
@@ -231,13 +254,10 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
-  // Convert CameraImage to model input format (OPTIMIZED)
   Future<List<List<List<List<double>>>>> _preprocessCameraImage(CameraImage image) async {
     try {
-      // Convert YUV420 to RGB (optimized)
       final imgLib = _convertYUV420ToImageOptimized(image);
 
-      // Resize to model input size
       final resized = img.copyResize(
         imgLib,
         width: inputSize,
@@ -245,7 +265,6 @@ class _CameraScreenState extends State<CameraScreen> {
         interpolation: img.Interpolation.nearest, // ⚡ Faster than linear
       );
 
-      // Convert to normalized tensor [1, 224, 224, 3]
       final inputTensor = List.generate(
         1,
             (_) => List.generate(
@@ -272,12 +291,10 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  // Optimized YUV420 to RGB conversion (samples every 2nd pixel)
   img.Image _convertYUV420ToImageOptimized(CameraImage cameraImage) {
     final width = cameraImage.width;
     final height = cameraImage.height;
 
-    // Sample at lower resolution for speed
     final sampleWidth = width ~/ 2;
     final sampleHeight = height ~/ 2;
 
@@ -294,7 +311,6 @@ class _CameraScreenState extends State<CameraScreen> {
     final uvRowStride = uPlane.bytesPerRow;
     final uvPixelStride = uPlane.bytesPerPixel ?? 1;
 
-    // Sample every 2nd pixel for performance
     for (int y = 0; y < sampleHeight; y++) {
       for (int x = 0; x < sampleWidth; x++) {
         final srcX = x * 2;
@@ -321,7 +337,6 @@ class _CameraScreenState extends State<CameraScreen> {
     return image;
   }
 
-  // Keep original for fallback
   img.Image _convertYUV420ToImage(CameraImage cameraImage) {
     final width = cameraImage.width;
     final height = cameraImage.height;
@@ -348,7 +363,6 @@ class _CameraScreenState extends State<CameraScreen> {
         final uValue = uBuffer[uvIndex];
         final vValue = vBuffer[uvIndex];
 
-        // YUV to RGB conversion
         final r = (yValue + 1.402 * (vValue - 128)).clamp(0, 255).toInt();
         final g = (yValue - 0.344136 * (uValue - 128) - 0.714136 * (vValue - 128))
             .clamp(0, 255)
@@ -398,7 +412,7 @@ class _CameraScreenState extends State<CameraScreen> {
         ),
       ),
 
-      // ✅ SIMPLE BODY UI
+
       body: hasError
           ? Center(
         child: Column(
