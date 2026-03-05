@@ -13,8 +13,6 @@ import 'app_state.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/guest_home.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

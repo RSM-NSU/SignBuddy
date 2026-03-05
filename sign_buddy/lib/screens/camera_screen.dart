@@ -333,7 +333,6 @@ class _CameraScreenState extends State<CameraScreen> {
         image.setPixelRgba(x, y, r, g, b, 255);
       }
     }
-
     return image;
   }
 
@@ -411,7 +410,6 @@ class _CameraScreenState extends State<CameraScreen> {
           style: TextStyle(color: isDark ? LightColor : DarkColor),
         ),
       ),
-
 
       body: hasError
           ? Center(
@@ -516,9 +514,9 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
             ),
           ),
+          
         ],
       ),
     );
   }
-
 }
