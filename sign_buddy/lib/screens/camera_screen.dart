@@ -51,7 +51,7 @@ class _CameraScreenState extends State<CameraScreen> {
   String predictionLabel = "Initializing...";
   double confidence = 0.0;
   String errorMessage = "";
-
+  late String detectedText=" $predictionLabel";
 
   // Performance optimization
   int _frameCount = 0;
@@ -71,8 +71,6 @@ class _CameraScreenState extends State<CameraScreen> {
     dbHelper.createDatabase();
     initCameraAndModel();
   }
-
-
 
   Future<void> initCameraAndModel() async {
     setState(() {
@@ -232,16 +230,27 @@ class _CameraScreenState extends State<CameraScreen> {
           if (user != null &&
               maxConfidence > 0.7 &&
               newPrediction != lastSavedPrediction &&
-              newPrediction != "NOTHING" &&
-              newPrediction != "SPACE") {
+              newPrediction != "NOTHING") {
 
             lastSavedPrediction = newPrediction;
-            print("Saving...");
-            await dbHelper.insertHistory(
-              user.uid,
-              newPrediction,
-              maxConfidence,
-              DateTime.now().toIso8601String(), // Better format for DB
+            // Build Sentence
+            if(newPrediction=="SPACE"){
+              detectedText+="";
+            }else if(newPrediction=="DEL"){
+              if(detectedText.isNotEmpty){
+                detectedText=
+                    detectedText.substring(0,detectedText.length-1);
+              }
+            }else{
+              detectedText+=newPrediction;
+            }
+            setState(() {});
+            await dbHelper.insertHistory
+              (
+                user.uid,
+                newPrediction,
+                maxConfidence,
+                DateTime.now().toIso8601String()
             );
           }
         }
@@ -451,6 +460,28 @@ class _CameraScreenState extends State<CameraScreen> {
 
           // 🔹 CAMERA PREVIEW
           CameraPreview(_cameraController!),
+          // 🔹 DETECTED TEXT CONTAINER (UI ONLY)
+          Positioned(
+            bottom: -1,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                "Detected Text Will Appear Here",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
 
           // 🔹 BOTTOM RESULT PANEL
           Positioned(
@@ -514,7 +545,6 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
             ),
           ),
-          
         ],
       ),
     );
