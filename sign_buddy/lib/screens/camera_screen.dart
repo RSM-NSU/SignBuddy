@@ -455,20 +455,90 @@ class _CameraScreenState extends State<CameraScreen> {
           ],
         ),
       )
-          : Stack(
+          : Column(
         children: [
 
-          // 🔹 CAMERA PREVIEW
-          CameraPreview(_cameraController!),
+          // 🔹 CAMERA AREA
+          SizedBox(
+            height: 500,
+
+            child: Stack(
+              children: [
+
+                // CAMERA PREVIEW
+                CameraPreview(_cameraController!),
+
+                // RESULT area
+                Positioned(
+                  bottom: 18,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    color: Colors.black.withOpacity(0.7),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          predictionLabel.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // START BUTTON
+                if (predictionLabel.contains("Tap"))
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: startDetection,
+                      child: const Text("Start Detection"),
+                    ),
+                  ),
+
+                // LIVE / IDLE INDICATOR
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isProcessingFrame
+                          ? Colors.green
+                          : Colors.grey,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isProcessingFrame ? "LIVE" : "IDLE",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // 🔹 DETECTED TEXT CONTAINER (UI ONLY)
-          Positioned(
-            bottom: -1,
-            left: 20,
-            right: 20,
-            child: Container(
+         Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.blueGrey,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
@@ -481,72 +551,11 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
               ),
             ),
-          ),
 
-          // 🔹 BOTTOM RESULT PANEL
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              color: Colors.black.withOpacity(0.7),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    predictionLabel.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-          ),
 
-          // 🔹 START BUTTON
-          if (predictionLabel.contains("Tap"))
-            Center(
-              child: ElevatedButton(
-                onPressed: startDetection,
-                child: const Text("Start Detection"),
-              ),
-            ),
-
-          // 🔹 LIVE / IDLE INDICATOR
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isProcessingFrame
-                    ? Colors.green
-                    : Colors.grey,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                isProcessingFrame ? "LIVE" : "IDLE",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
+
     );
   }
 }
