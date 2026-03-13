@@ -12,6 +12,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
 
     bool isDark = AppState.isDark.value;
+    print(isDark);
     final LightColor = AppState.LightColor;
     final DarkColor = AppState.DarkColor;
 
