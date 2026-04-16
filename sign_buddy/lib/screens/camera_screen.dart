@@ -51,7 +51,7 @@ class _CameraScreenState extends State<CameraScreen> {
   String predictionLabel = "Initializing...";
   double confidence = 0.0;
   String errorMessage = "";
-  late String detectedText=" $predictionLabel";
+  String detectedText="";
 
   // Performance optimization
   int _frameCount = 0;
@@ -535,27 +535,47 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
 
           // 🔹 DETECTED TEXT CONTAINER (UI ONLY)
-         Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.blueGrey,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "Detected Text Will Appear Here",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(15),
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey,
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
 
+                // 🔹 CURRENT LETTER (LIVE)
+                Text(
+                  "Current: ${predictionLabel.toUpperCase()}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
+                const SizedBox(height: 10),
+
+                // 🔹 BUILT SENTENCE
+                Text(
+                  detectedText.trim().isEmpty
+                      ? "Start Signing..."
+                      : detectedText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
-
     );
   }
 }
