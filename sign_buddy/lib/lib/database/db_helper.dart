@@ -29,7 +29,6 @@ class DatabaseHelper {
   Future<void> insertHistory(
       String userId,
       String predictedSign,
-      double confidence,
       String dateTime
       ) async {
 
@@ -38,7 +37,6 @@ class DatabaseHelper {
       {
         'userId': userId,
         'predictedSign': predictedSign,
-        'confidence': confidence,
         'dateTime': dateTime,
       },
     );

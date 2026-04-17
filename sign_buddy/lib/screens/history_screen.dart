@@ -96,7 +96,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: ListTile(
 
                 title: Text(
-                  "Sign: ${item['predictedSign']}",
+                  "Sign: ${item['predictedSign'].toString().trim().replaceAll(RegExp(r'\s+'), ' ')}",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -106,15 +106,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  "Confidence: ${(item['confidence'] * 100).toStringAsFixed(1)}%\n"
-                      "Time&Date: ${item['dateTime']}",
+                  "Date & Time: ${item['dateTime'].toString().replaceAll('T', ' ')}",
                   style: TextStyle(
                     color: isDark
                         ? Color(0xFF212842)
                         : Color(0xFFF0E7D5),
                   ),
                 ),
-
 
               trailing: IconButton(
                   icon: Icon(
