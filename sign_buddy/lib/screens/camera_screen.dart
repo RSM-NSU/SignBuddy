@@ -524,7 +524,7 @@ class _CameraScreenState extends State<CameraScreen> {
           
               // 🔹 CAMERA AREA
               SizedBox(
-                height: 500,
+      height: 500,
           
           
                 child: Stack(
@@ -546,42 +546,18 @@ class _CameraScreenState extends State<CameraScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              predictionLabel.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
+
+                             SizedBox(height: 8),
                             Text(
                               "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
-                              style: const TextStyle(color: Colors.white70),
+                              style:  TextStyle(color: Colors.white70),
                             ),
                           ],
                         ),
                       ),
                     ),
           
-                    // START BUTTON
-                    if (predictionLabel.contains("Tap"))
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: startDetection,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark
-                                ? AppState.DarkColor
-                                : AppState.LightColor,
-                            foregroundColor: isDark
-                                ? AppState.LightColor
-                                : AppState.DarkColor,
-                            padding:  EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 12),
-                          ),
-                          child:  Text("Start Detection"),
-                        ),
-                      ),
+
           
                     // LIVE / IDLE INDICATOR
                     Positioned(
@@ -626,7 +602,25 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-          
+                    if (predictionLabel.contains("Tap"))
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: startDetection,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? AppState.DarkColor
+                                : AppState.LightColor,
+                            foregroundColor: isDark
+                                ? AppState.LightColor
+                                : AppState.DarkColor,
+                            padding:  EdgeInsets.symmetric(
+                                horizontal: 25, vertical: 12),
+                          ),
+                          child:  Text("Start Detection"),
+                        ),
+                      ),
+
+                    SizedBox(height: 10,),
                     //  CURRENT LETTER
                     Text(
                       "Current: ${predictionLabel.toUpperCase()}",
