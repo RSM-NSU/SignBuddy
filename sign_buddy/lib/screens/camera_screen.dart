@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:path/path.dart';
 import 'package:sign_buddy/lib/database/db_helper.dart' ;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: CameraScreen(),
@@ -467,248 +469,232 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final appBarHeight = AppBar().preferredSize.height;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final availableHeight = screenHeight - appBarHeight - statusBarHeight - bottomPadding - 8;
+
     return Scaffold(
-      backgroundColor: isDark ? LightColor : DarkColor,
+      backgroundColor: isDark ?  DarkColor : LightColor,
 
       appBar: AppBar(
         backgroundColor: isDark ? DarkColor : LightColor,
+        foregroundColor: AppState.isDark.value ? LightColor:DarkColor,
         title: Text(
-          "CNN Object Detection",
+          "Sign Language Translator",
           style: TextStyle(color: isDark ? LightColor : DarkColor),
         ),
       ),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: hasError
-              ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 60),
-                const SizedBox(height: 10),
-                Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: initCameraAndModel,
-                  child: const Text("Retry"),
-                )
-              ],
-            ),
-          )
-          
-          
-              : !isCameraReady
-              ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  color: isDark ? LightColor : DarkColor,
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  predictionLabel,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          )
-          
-          
-              : Column(
+        child: hasError
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-          
-              // 🔹 CAMERA AREA
-              SizedBox(
-      height: 500,
-          
-          
-                child: Stack(
-          
-                  children: [
-          
-                    // CAMERA PREVIEW
-                    CameraPreview(_cameraController!),
-          
-                    // RESULT area
-                    Positioned(
-                      bottom: 18,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding:  EdgeInsets.all(20),
-                        color: Colors.black26.withOpacity(0.7),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-
-                             SizedBox(height: 8),
-                            Text(
-                              "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
-                              style:  TextStyle(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-          
-
-          
-                    // LIVE / IDLE INDICATOR
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: Container(
-                        padding:  EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isProcessingFrame
-                              ? Colors.green
-                              : Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          isProcessingFrame ? "LIVE" : "IDLE",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-          
-          
-          
-                  ],
-                ),
+              const Icon(Icons.error, color: Colors.red, size: 60),
+              const SizedBox(height: 10),
+              Text(
+                errorMessage,
+                style: const TextStyle(color: Colors.white),
               ),
-              // DETECTED TEXT CONTAINER
-              Container(
-          
-                width: double.infinity,
-                padding:  EdgeInsets.all(15),
-                margin:  EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-          
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (predictionLabel.contains("Tap"))
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: startDetection,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark
-                                ? AppState.DarkColor
-                                : AppState.LightColor,
-                            foregroundColor: isDark
-                                ? AppState.LightColor
-                                : AppState.DarkColor,
-                            padding:  EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 12),
-                          ),
-                          child:  Text("Start Detection"),
-                        ),
-                      ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: initCameraAndModel,
+                child: const Text("Retry"),
+              )
+            ],
+          ),
+        )
 
-                    SizedBox(height: 10,),
-                    //  CURRENT LETTER
-                    Text(
-                      "Current: ${predictionLabel.toUpperCase()}",
-                      style:  TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            : !isCameraReady
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: isDark ? LightColor : DarkColor,
+              ),
+              const SizedBox(height: 15),
+              Text(
+                predictionLabel,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        )
+
+            : Column(
+          children: [
+
+            // 🔹 CAMERA AREA
+            SizedBox(
+              height: availableHeight * 0.65,
+              child: Stack(
+                children: [
+
+                  // CAMERA PREVIEW
+                  SizedBox.expand(child: CameraPreview(_cameraController!)),
+
+                  // RESULT area
+                  Positioned(
+                    bottom: 18,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.black26,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text(
+                            "Confidence: ${(confidence * 100).toStringAsFixed(1)}%",
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ],
                       ),
                     ),
-          
-                     SizedBox(height: 10),
-          
-                    //  FULL SENTENCE
-                    Container(
-                      width: double.infinity,
-                      padding:  EdgeInsets.all(10),
+                  ),
+
+                  // LIVE / IDLE INDICATOR
+                  Positioned(
+                    top: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(10),
+                        color: isProcessingFrame
+                            ? Colors.green
+                            : Colors.grey,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-          
-                      child: SizedBox(
-                        height: 50,
+                      child: Text(
+                        isProcessingFrame ? "LIVE" : "IDLE",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+
+            // DETECTED TEXT CONTAINER
+            Container(
+              width: double.infinity,
+              height: availableHeight * 0.35,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: isDark ? LightColor : DarkColor,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+
+                  const SizedBox(height: 10),
+
+                  //  FULL SENTENCE
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: isDark
+                            ? Colors.white.withAlpha(50)
+                            : Colors.black.withAlpha(100),
+                      ),
                         child: SingleChildScrollView(
                           child: Text(
                             detectedText.trim().isEmpty
-                                ? "Start Signing..."
+                                ? "Prediction will appear here"
                                 : detectedText,
                             textAlign: TextAlign.center,
-                            style:  TextStyle(
-                              color: Colors.greenAccent,
-                              fontSize: 24,
+                            style: TextStyle(
+                              color: isDark ? Colors.black : Colors.white,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
                     ),
-          
-                     SizedBox(height: 10),
-          ///butoon stop and clear
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-          
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              detectedText = "";
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark
-                                ? AppState.DarkColor
-                                : AppState.LightColor,
-                            foregroundColor: isDark
-                                ? AppState.LightColor
-                                : AppState.DarkColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                          ),
-                          child: const Text("CLEAR"),
+
+
+
+                  /// buttons stop and clear
+                  // Spacer(),
+                  Row(
+
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+
+                      ElevatedButton(
+                        onPressed: startDetection,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark
+                              ? AppState.DarkColor
+                              : AppState.LightColor,
+                          foregroundColor: isDark
+                              ? AppState.LightColor
+                              : AppState.DarkColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 12),
                         ),
-          
-                        ElevatedButton(
-                          onPressed: stopDetection,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark
-                                ? AppState.DarkColor
-                                : AppState.LightColor,
-                            foregroundColor: isDark
-                                ? AppState.LightColor
-                                : AppState.DarkColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                          ),
-                          child: const Text("STOP"),
+                        child: const Text("Start"),
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            detectedText = "";
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark
+                              ? AppState.DarkColor
+                              : AppState.LightColor,
+                          foregroundColor: isDark
+                              ? AppState.LightColor
+                              : AppState.DarkColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                         ),
-          
-          
-                      ],
-                    ),
-          
-                  ],
-                ),
-              )
-            ],
-          ),
+                        child: const Text("CLEAR"),
+                      ),
+
+                      ElevatedButton(
+                        onPressed: stopDetection,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark
+                              ? AppState.DarkColor
+                              : AppState.LightColor,
+                          foregroundColor: isDark
+                              ? AppState.LightColor
+                              : AppState.DarkColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                        ),
+                        child: const Text("STOP"),
+                      ),
+
+                    ],
+                  ),
+
+                ],
+              ),
+            ),
+
+          ],
         ),
       ),
     );
