@@ -13,18 +13,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     bool isDark = AppState.isDark.value;
     print(isDark);
-    final LightColor = AppState.LightColor;
-    final DarkColor = AppState.DarkColor;
+    final lightColor = AppState.lightColor;
+    final darkColor = AppState.darkColor;
 
     return Scaffold(
-      backgroundColor: isDark ? DarkColor : LightColor,
+      backgroundColor: isDark ? darkColor : lightColor,
 
       appBar: AppBar(
-        backgroundColor: isDark ? DarkColor : LightColor,
+        backgroundColor: isDark ? darkColor : lightColor,
         title: Text(
           'Welcome To Sign Buddy',
           style: TextStyle(
-            color: isDark ? LightColor : DarkColor,
+            color: isDark ? lightColor : darkColor,
           ),
         ),
       ),
@@ -40,7 +40,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 style: TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? LightColor : DarkColor,
+                  color: isDark ? lightColor : darkColor,
                 ),
               ),
 
@@ -50,7 +50,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 "Sign to Text & Speech Translator",
                 style: TextStyle(
                   fontSize: 16,
-                  color: isDark ? LightColor : DarkColor,
+                  color: isDark ? lightColor : darkColor,
                 ),
               ),
 
@@ -59,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 55),
-                  backgroundColor: isDark ? LightColor : DarkColor,
+                  backgroundColor: isDark ? lightColor : darkColor,
                 ),
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/login');
@@ -68,7 +68,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   "Login",
                   style: TextStyle(
                     fontSize: 18,
-                    color: isDark ? DarkColor : LightColor,
+                    color: isDark ? darkColor : lightColor,
                   ),
                 ),
               ),
@@ -78,7 +78,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 55),
-                  backgroundColor: isDark ? LightColor : DarkColor,
+                  backgroundColor: isDark ? lightColor : darkColor,
                 ),
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/signup');
@@ -87,7 +87,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   "Signup",
                   style: TextStyle(
                     fontSize: 18,
-                    color: isDark ? DarkColor : LightColor,
+                    color: isDark ? darkColor : lightColor,
                   ),
                 ),
               ),
@@ -97,7 +97,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 55),
-                  backgroundColor: isDark ? LightColor : DarkColor,
+                  backgroundColor: isDark ? lightColor : darkColor,
                 ),
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/guest');
@@ -106,7 +106,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   "Continue as Guest",
                   style: TextStyle(
                     fontSize: 18,
-                    color: isDark ? DarkColor : LightColor,
+                    color: isDark ? darkColor : lightColor,
                   ),
                 ),
               ),

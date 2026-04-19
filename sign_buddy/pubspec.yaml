@@ -81,6 +81,8 @@ flutter:
        - assets/images/
        - assets/animations/
        - assets/models/ccn_model.tflite
+       - assets/models/asl_alphabet_model.tflite
+       - assets/models/labels.json
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

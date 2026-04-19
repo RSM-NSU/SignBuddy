@@ -1,13 +1,15 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:path/path.dart';
+
 import 'package:sign_buddy/lib/database/db_helper.dart' ;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:sign_buddy/app_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:sign_buddy/services/landmark_service.dart';
+import 'package:sign_buddy/services/label_encoder_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,8 +37,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   bool isDark = AppState.isDark.value;
-  static final LightColor = AppState.LightColor;
-  static final DarkColor = AppState.DarkColor;
+  static final lightColor = AppState.lightColor;
+  static final darkColor = AppState.darkColor;
   CameraController? _cameraController;
   Interpreter? _interpreter;
   List<CameraDescription>? _cameras;
@@ -64,18 +66,14 @@ class _CameraScreenState extends State<CameraScreen> {
   static const int _frameSkip = 3; // Process every 3rd frame
   DateTime _lastProcessTime = DateTime.now();
 
-  final List<String> labels = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-    'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-    'V', 'W', 'X', 'Y', 'Z',
-    'DEL', 'SPACE', 'NOTHING'
-  ];
+  final LabelEncoderService _labelEncoder = LabelEncoderService();
+
 
   @override
   void initState() {
     super.initState();
     dbHelper.createDatabase();
-    initCameraAndModel();
+    _labelEncoder.loadFromIndexMap().then((_)=>initCameraAndModel());
   }
 
   Future<void> initCameraAndModel() async {
@@ -118,7 +116,7 @@ class _CameraScreenState extends State<CameraScreen> {
       );
 
       await _cameraController!.initialize();
-
+      debugPrint("Camera init DONE");
       if (!mounted) return;
 
       setState(() {
@@ -181,261 +179,87 @@ class _CameraScreenState extends State<CameraScreen> {
 
   void _onCameraFrame(CameraImage image) {
     _frameCount++;
-    if (_frameCount % _frameSkip != 0) {
-      return;
-    }
-
+    if (_frameCount % _frameSkip != 0) return;
     if (isProcessingFrame || _interpreter == null) return;
 
     final now = DateTime.now();
-    if (now.difference(_lastProcessTime).inMilliseconds < 100) {
-      return;
-    }
+    if (now.difference(_lastProcessTime).inMilliseconds < 100) return;
     _lastProcessTime = now;
-
     isProcessingFrame = true;
 
     Future.microtask(() async {
-      if (!mounted) {
-        isProcessingFrame = false;
-        return;
-      }
+      if (!mounted) { isProcessingFrame = false; return; }
 
       try {
-        final input = await _preprocessCameraImage(image);
+        // Get 63 landmark values from MediaPipe
+        final landmarks = await LandmarkService.extractLandmarks(image);
 
-        final outputShape = _interpreter!.getOutputTensor(0).shape;
-        final numClasses = outputShape[1];
+        if (landmarks == null) {
+          setState(() { predictionLabel = "No hand detected"; confidence = 0.0; });
+          return;
+        }
 
-        final output = List.filled(numClasses, 0.0).reshape([1, numClasses]);
+        // Input shape is now [1, 63] — not [1, 224, 224, 3]
+        final input = [landmarks];
+
+        final outputShape  = _interpreter!.getOutputTensor(0).shape;
+        final numClasses   = outputShape[1];
+        final output       = List.filled(numClasses, 0.0).reshape([1, numClasses]);
 
         _interpreter!.run(input, output);
 
-        final predictions = output[0] as List<double>;
-        final maxIndex = predictions.indexOf(predictions.reduce(max));
+        final predictions  = output[0] as List<double>;
+        final maxIndex     = predictions.indexOf(predictions.reduce(max));
         final maxConfidence = predictions[maxIndex];
+        final newPrediction = _labelEncoder.decode(maxIndex);
 
         if (mounted) {
-
-          String newPrediction;
-
-          if (maxIndex < labels.length) {
-            newPrediction = labels[maxIndex];
-          } else {
-            newPrediction = "Class $maxIndex";
-          }
-
           setState(() {
             predictionLabel = newPrediction;
-            confidence = maxConfidence;
+            confidence      = maxConfidence;
           });
 
-
-
-
-          //  SAVE TO DATABASE
+          // ---- everything below is unchanged from your original code ----
           final user = FirebaseAuth.instance.currentUser;
-
           if (user != null &&
-              (
-                  (maxConfidence > 0.7 &&
-                      newPrediction != "NOTHING" &&
-                      newPrediction != "SPACE")
-
-                      ||
-
-                      (newPrediction == "NOTHING" || newPrediction == "SPACE")
-              )
-          ){
+              ((maxConfidence > 0.7 &&
+                  newPrediction != "NOTHING" &&
+                  newPrediction != "SPACE") ||
+                  (newPrediction == "NOTHING" || newPrediction == "SPACE"))) {
 
             final now = DateTime.now();
-
-            //  prevent repeat letters
             if (newPrediction == lastPrediction &&
-                now.difference(lastAddedTime).inMilliseconds < 800) {
-              return;
-            }
+                now.difference(lastAddedTime).inMilliseconds < 800) {return;}
 
             lastPrediction = newPrediction;
-            lastAddedTime = now;
+            lastAddedTime  = now;
 
-            // build snctece
             if (newPrediction == "DEL") {
-
-              if (detectedText.isNotEmpty) {
-                detectedText =
-                    detectedText.substring(0, detectedText.length - 1);
-              }
-
+              if (detectedText.isNotEmpty){
+                detectedText = detectedText.substring(0, detectedText.length - 1);}
               isLastWasSpace = false;
-
-            }
-            else if (newPrediction == "SPACE") {
-
+            } else if (newPrediction == "SPACE") {
               if (!isLastWasSpace && detectedText.isNotEmpty) {
-                detectedText += " ";
+                detectedText  += " ";
                 isLastWasSpace = true;
               }
-
-            }
-            else if (newPrediction == "NOTHING") {
-
-              //  DO NOTHING
+            } else if (newPrediction == "NOTHING") {
               return;
-
-            }
-            else {
-              detectedText += newPrediction;
-              isLastWasSpace = false;
+            } else {
+              detectedText   += newPrediction;
+              isLastWasSpace  = false;
             }
             setState(() {});
           }
         }
-
       } catch (e) {
-        debugPrint("Inference error: $e");
+        debugPrint('Inference error: $e');
       } finally {
         isProcessingFrame = false;
       }
     });
   }
 
-  Future<List<List<List<List<double>>>>> _preprocessCameraImage(CameraImage image) async {
-    try {
-      final imgLib = _convertYUV420ToImageOptimized(image);
-
-      final resized = img.copyResize(
-        imgLib,
-        width: inputSize,
-        height: inputSize,
-        interpolation: img.Interpolation.nearest, // ⚡ Faster than linear
-      );
-
-      final inputTensor = List.generate(
-        1,
-            (_) => List.generate(
-          inputSize,
-              (y) => List.generate(
-            inputSize,
-                (x) {
-              final pixel = resized.getPixel(x, y);
-              // Normalize to [0, 1]
-              return [
-                pixel.r / 255.0,
-                pixel.g / 255.0,
-                pixel.b / 255.0,
-              ];
-            },
-          ),
-        ),
-      );
-
-      return inputTensor;
-    } catch (e) {
-      debugPrint("Image preprocessing error: $e");
-      return _createDummyInput();
-    }
-  }
-
-  img.Image _convertYUV420ToImageOptimized(CameraImage cameraImage) {
-    final width = cameraImage.width;
-    final height = cameraImage.height;
-
-    final sampleWidth = width ~/ 2;
-    final sampleHeight = height ~/ 2;
-
-    final img.Image image = img.Image(width: sampleWidth, height: sampleHeight);
-
-    final yPlane = cameraImage.planes[0];
-    final uPlane = cameraImage.planes[1];
-    final vPlane = cameraImage.planes[2];
-
-    final yBuffer = yPlane.bytes;
-    final uBuffer = uPlane.bytes;
-    final vBuffer = vPlane.bytes;
-
-    final uvRowStride = uPlane.bytesPerRow;
-    final uvPixelStride = uPlane.bytesPerPixel ?? 1;
-
-    for (int y = 0; y < sampleHeight; y++) {
-      for (int x = 0; x < sampleWidth; x++) {
-        final srcX = x * 2;
-        final srcY = y * 2;
-
-        final yIndex = srcY * width + srcX;
-        final uvIndex = (srcY ~/ 2) * uvRowStride + (srcX ~/ 2) * uvPixelStride;
-
-        final yValue = yBuffer[yIndex];
-        final uValue = uBuffer[uvIndex];
-        final vValue = vBuffer[uvIndex];
-
-        // YUV to RGB conversion
-        final r = (yValue + 1.402 * (vValue - 128)).clamp(0, 255).toInt();
-        final g = (yValue - 0.344136 * (uValue - 128) - 0.714136 * (vValue - 128))
-            .clamp(0, 255)
-            .toInt();
-        final b = (yValue + 1.772 * (uValue - 128)).clamp(0, 255).toInt();
-
-        image.setPixelRgba(x, y, r, g, b, 255);
-      }
-    }
-    return image;
-  }
-
-  img.Image _convertYUV420ToImage(CameraImage cameraImage) {
-    final width = cameraImage.width;
-    final height = cameraImage.height;
-
-    final img.Image image = img.Image(width: width, height: height);
-
-    final yPlane = cameraImage.planes[0];
-    final uPlane = cameraImage.planes[1];
-    final vPlane = cameraImage.planes[2];
-
-    final yBuffer = yPlane.bytes;
-    final uBuffer = uPlane.bytes;
-    final vBuffer = vPlane.bytes;
-
-    final uvRowStride = uPlane.bytesPerRow;
-    final uvPixelStride = uPlane.bytesPerPixel ?? 1;
-
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        final yIndex = y * width + x;
-        final uvIndex = (y ~/ 2) * uvRowStride + (x ~/ 2) * uvPixelStride;
-
-        final yValue = yBuffer[yIndex];
-        final uValue = uBuffer[uvIndex];
-        final vValue = vBuffer[uvIndex];
-
-        final r = (yValue + 1.402 * (vValue - 128)).clamp(0, 255).toInt();
-        final g = (yValue - 0.344136 * (uValue - 128) - 0.714136 * (vValue - 128))
-            .clamp(0, 255)
-            .toInt();
-        final b = (yValue + 1.772 * (uValue - 128)).clamp(0, 255).toInt();
-
-        image.setPixelRgba(x, y, r, g, b, 255);
-      }
-    }
-
-    return image;
-  }
-
-  List<List<List<List<double>>>> _createDummyInput() {
-    return List.generate(
-      1,
-          (_) => List.generate(
-        inputSize,
-            (_) => List.generate(
-          inputSize,
-              (_) => List.generate(
-            3,
-                (_) => Random().nextDouble() * 2 - 1,
-          ),
-        ),
-      ),
-    );
-  }
 
   // 🔹 STOP FUNCTION
   void stopDetection() async {
@@ -476,14 +300,14 @@ class _CameraScreenState extends State<CameraScreen> {
     final availableHeight = screenHeight - appBarHeight - statusBarHeight - bottomPadding - 8;
 
     return Scaffold(
-      backgroundColor: isDark ?  DarkColor : LightColor,
+      backgroundColor: isDark ?  darkColor : lightColor,
 
       appBar: AppBar(
-        backgroundColor: isDark ? DarkColor : LightColor,
-        foregroundColor: AppState.isDark.value ? LightColor:DarkColor,
+        backgroundColor: isDark ? darkColor : lightColor,
+        foregroundColor: AppState.isDark.value ? lightColor:darkColor,
         title: Text(
           "Sign Language Translator",
-          style: TextStyle(color: isDark ? LightColor : DarkColor),
+          style: TextStyle(color: isDark ? lightColor : darkColor),
         ),
       ),
 
@@ -514,12 +338,14 @@ class _CameraScreenState extends State<CameraScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(
-                color: isDark ? LightColor : DarkColor,
+                color: isDark ? lightColor : darkColor,
               ),
               const SizedBox(height: 15),
               Text(
                 predictionLabel,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                    color: isDark ?
+                    lightColor : darkColor),
               ),
             ],
           ),
@@ -593,7 +419,7 @@ class _CameraScreenState extends State<CameraScreen> {
               height: availableHeight * 0.35,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: isDark ? LightColor : DarkColor,
+                color: isDark ? lightColor : darkColor,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -642,11 +468,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         onPressed: startDetection,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.DarkColor
-                              : AppState.LightColor,
+                              ? AppState.darkColor
+                              : AppState.lightColor,
                           foregroundColor: isDark
-                              ? AppState.LightColor
-                              : AppState.DarkColor,
+                              ? AppState.lightColor
+                              : AppState.darkColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 25, vertical: 12),
                         ),
@@ -661,11 +487,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.DarkColor
-                              : AppState.LightColor,
+                              ? AppState.darkColor
+                              : AppState.lightColor,
                           foregroundColor: isDark
-                              ? AppState.LightColor
-                              : AppState.DarkColor,
+                              ? AppState.lightColor
+                              : AppState.darkColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                         ),
@@ -676,11 +502,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         onPressed: stopDetection,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.DarkColor
-                              : AppState.LightColor,
+                              ? AppState.darkColor
+                              : AppState.lightColor,
                           foregroundColor: isDark
-                              ? AppState.LightColor
-                              : AppState.DarkColor,
+                              ? AppState.lightColor
+                              : AppState.darkColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                         ),

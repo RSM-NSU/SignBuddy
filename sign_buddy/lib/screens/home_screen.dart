@@ -14,8 +14,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   File? profileImage;
-  var LightColor = AppState.LightColor; //0xFFF0E7D5
-  var DarkColor = AppState.DarkColor; //0xFF212842
+  var lightColor = AppState.lightColor; //0xFFF0E7D5
+  var darkColor = AppState.darkColor; //0xFF212842
   @override
   void initState() {
     super.initState();
@@ -81,29 +81,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppState.isDark.value
-            ? DarkColor
-            : LightColor,
-        foregroundColor: AppState.isDark.value ? LightColor:DarkColor,
+            ? darkColor
+            : lightColor,
+        foregroundColor: AppState.isDark.value ? lightColor:darkColor,
         title: Text(
           'Sign Buddy',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: AppState.isDark.value
-                ? LightColor
-                : DarkColor,
+                ? lightColor
+                : darkColor,
           ),
         ),
       ),
 
       backgroundColor: AppState.isDark.value
-          ? DarkColor
-          : LightColor,
+          ? darkColor
+          : lightColor,
 
       drawer: Drawer(
         backgroundColor: AppState.isDark.value
-            ? DarkColor
-            : LightColor,
+            ? darkColor
+            : lightColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -111,31 +111,31 @@ class _HomeScreenState extends State<HomeScreen> {
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(
                 color: AppState.isDark.value
-                    ? DarkColor
-                    : LightColor,
+                    ? darkColor
+                    : lightColor,
               ),
               accountName: Text(
                 user?.displayName ?? 'User',
                 style: TextStyle(
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
               ),
               accountEmail: Text(
                 user?.email ?? '',
                 style: TextStyle(
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
               ),
               currentAccountPicture: GestureDetector(
                 onTap: pickProfileImage,
                 child: CircleAvatar(
                   backgroundColor: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                   backgroundImage:
                   profileImage != null ? FileImage(profileImage!) : null,
                   child: profileImage == null
@@ -143,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icons.person,
                     size: 40,
                     color: AppState.isDark.value
-                        ? DarkColor
-                        : LightColor,
+                        ? darkColor
+                        : lightColor,
                   )
                       : null,
                 ),
@@ -154,14 +154,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.person,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Edit Profile',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () async {
                 final result = await Navigator.pushNamed(context, '/edit');
@@ -174,14 +174,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.lock,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Change Password',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () => Navigator.pushNamed(context, '/forget'),
             ),
@@ -189,14 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.menu_book,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Learn Sign Language',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: openLearnASL,
             ),
@@ -204,14 +204,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.history,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'History',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () => Navigator.pushNamed(context, '/history'),
             ),
@@ -219,14 +219,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.help,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Help & Support',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () {
                 showDialog(
@@ -243,14 +243,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.info,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'About App',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () {
                 showDialog(
@@ -269,14 +269,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.brightness_6,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Dark / Light Theme',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               trailing: Switch(
                 value: AppState.isDark.value,
@@ -293,14 +293,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(Icons.logout,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor),
+                      ? lightColor
+                      : darkColor),
               title: Text(
                 'Sign Out',
                 style: TextStyle(
                     color: AppState.isDark.value
-                        ? LightColor
-                        : DarkColor),
+                        ? lightColor
+                        : darkColor),
               ),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
@@ -316,8 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
           width: double.infinity,
           padding:  EdgeInsets.all(20),
           color: AppState.isDark.value
-              ? DarkColor
-              : LightColor,
+              ? darkColor
+              : lightColor,
           child: Column(
             children: [
 
@@ -335,8 +335,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
               ),
 
@@ -347,8 +347,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   color: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
               ),
 
@@ -358,8 +358,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: ElevatedButton.styleFrom(
                   minimumSize:  Size(double.infinity, 60),
                   backgroundColor: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
                 onPressed: () => Navigator.pushNamed(context, '/camera'),
                 child: Text(
@@ -367,8 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     color: AppState.isDark.value
-                        ? DarkColor
-                        : LightColor,
+                        ? darkColor
+                        : lightColor,
                   ),
                 ),
               ),
@@ -379,8 +379,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: ElevatedButton.styleFrom(
                   minimumSize:  Size(double.infinity, 60),
                   backgroundColor: AppState.isDark.value
-                      ? LightColor
-                      : DarkColor,
+                      ? lightColor
+                      : darkColor,
                 ),
                 onPressed: () => Navigator.pushNamed(context, '/history'),
                 child: Text(
@@ -388,8 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     color: AppState.isDark.value
-                        ? DarkColor
-                        : LightColor,
+                        ? darkColor
+                        : lightColor,
                   ),
                 ),
               ),
