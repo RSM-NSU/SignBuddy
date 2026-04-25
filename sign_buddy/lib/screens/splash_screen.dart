@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: isDark ? darkColor : lightColor,
+      backgroundColor: isDark ? lightColor : darkColor,
 
       body: Center(
         child: Column(
@@ -53,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
               'Sign Buddy',
               style: TextStyle(
                 fontSize: 50,
-                color: isDark ? lightColor : darkColor,
+                color: isDark ? darkColor : lightColor,
                 letterSpacing: 1.5,
               ),
             ),
@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
               'Sign to Text & Speech Translator',
               style: TextStyle(
                 fontSize: 18,
-                color: isDark ? lightColor : darkColor,
+                color: isDark ? darkColor : lightColor,
               ),
             ),
 
