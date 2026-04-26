@@ -69,6 +69,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final LabelEncoderService _labelEncoder = LabelEncoderService();
 
 
+
   @override
   void initState() {
     super.initState();
@@ -457,8 +458,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
 
 
-                  /// buttons stop and clear
-                  // Spacer(),
+                  /// buttons stop and clear and Start
+
                   Row(
 
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
