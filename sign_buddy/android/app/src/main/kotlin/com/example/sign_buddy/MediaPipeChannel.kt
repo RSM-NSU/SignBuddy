@@ -23,14 +23,15 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
     private var handLandmarker: HandLandmarker? = null
 
     init {
-        try {
-            context.assets.open("hand_landmarker.task")
-            Log.d("MP_DEBUG", "Model FOUND")
-        } catch (e: Exception) {
-            Log.e("MP_DEBUG", "Model NOT FOUND")
-        }
-
-        setupLandmarker()
+        // Run MediaPipe setup on background thread so it doesn't block Flutter startup
+        Thread {
+            try {
+                setupLandmarker("hand_landmarker.task")
+                Log.d("MP_DEBUG", "MediaPipe ready")
+            } catch (e: Exception) {
+                Log.e("MP_DEBUG", "MediaPipe setup failed: ${e.message}")
+            }
+        }.start()
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -47,42 +48,48 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
         }
     }
 
-    private fun setupLandmarker() {
-        val modelFile = File(context.cacheDir, "hand_landmarker.task")
-        if (!modelFile.exists()) {
-            context.assets.open("hand_landmarker.task").use { input ->
-                modelFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-        }
-        Log.d("MP_DEBUG", "Model path: ${modelFile.absolutePath}")  // fix string template too
-
+    private fun setupLandmarker(modelPath: String) {
         val options = HandLandmarkerOptions.builder()
             .setBaseOptions(
                 BaseOptions.builder()
-                    .setModelAssetPath(modelFile.absolutePath)  // ← THIS is the fix
+                    .setModelAssetPath(modelPath)
                     .setDelegate(Delegate.CPU)
                     .build()
             )
             .setNumHands(1)
-            .setMinHandDetectionConfidence(0.5f)
+            .setMinHandDetectionConfidence(0.3f)
+            .setMinHandPresenceConfidence(0.3f)
+            .setMinTrackingConfidence(0.3f)
             .setRunningMode(RunningMode.IMAGE)
             .build()
 
         handLandmarker = HandLandmarker.createFromOptions(context, options)
     }
-
     private fun processFrame(bytes: ByteArray, width: Int, height: Int): List<Double>? {
+
+        if (handLandmarker == null) {
+            Log.d("MP_DEBUG", "handlandmarker is NULL")
+            return null
+        }
+
         val yuvImage = YuvImage(bytes, ImageFormat.NV21, width, height, null)
         val out = ByteArrayOutputStream()
         yuvImage.compressToJpeg(Rect(0, 0, width, height), 80, out)
         val bitmap = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
 
+        val matrix = android.graphics.Matrix()
+        matrix.postRotate(90f)  // front camera usually needs 270, back needs 90
+        val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+        )
+
         val mpImage = BitmapImageBuilder(bitmap).build()
         val result  = handLandmarker?.detect(mpImage) ?: return null
 
-        if (result.landmarks().isEmpty()) return null
+        if (result.landmarks().isEmpty()) {
+            Log.d("MP_DEBUG", "No hand landmarks detected")
+            return null
+        }
 
         val flat = mutableListOf<Double>()
         result.landmarks()[0].forEach { lm ->
@@ -90,6 +97,7 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
             flat.add(lm.y().toDouble())
             flat.add(lm.z().toDouble())
         }
+        Log.d("MP_DEBUG", "Landmarks detected: ${result.landmarks().size}")
         return flat  // 63 values
     }
 }

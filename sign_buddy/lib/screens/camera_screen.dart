@@ -74,7 +74,21 @@ class _CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     dbHelper.createDatabase();
-    _labelEncoder.loadFromIndexMap().then((_)=>initCameraAndModel());
+    _init();
+  }
+  Future<void> _init() async{
+    try{
+      await _labelEncoder.loadFromIndexMap();
+    }catch(e){
+      debugPrint("Label load failed");
+
+      setState(() {
+        hasError=true;
+        errorMessage="labels.json missing or invalid";
+      });
+      return;
+    }
+    await initCameraAndModel();
   }
 
   Future<void> initCameraAndModel() async {
@@ -112,7 +126,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       _cameraController = CameraController(
         _cameras!.first,
-        ResolutionPreset.low,
+        ResolutionPreset.high,
         enableAudio: false,
       );
 
@@ -179,8 +193,11 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void _onCameraFrame(CameraImage image) {
+    print("Interpreter: $_interpreter");
     _frameCount++;
-    if (_frameCount % _frameSkip != 0) return;
+    if (_frameCount % _frameSkip != 0) {
+      print("Processing frame...");
+      return;}
     if (isProcessingFrame || _interpreter == null) return;
 
     final now = DateTime.now();
@@ -443,7 +460,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         child: SingleChildScrollView(
                           child: Text(
                             detectedText.trim().isEmpty
-                                ? "Prediction will appear here"
+                                ? predictionLabel
                                 : detectedText,
                             textAlign: TextAlign.center,
                             style: TextStyle(
