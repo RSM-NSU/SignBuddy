@@ -1,4 +1,3 @@
-
 package com.example.sign_buddy
 
 import android.content.Context
@@ -16,22 +15,28 @@ import com.google.mediapipe.tasks.core.Delegate
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
-import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngine) {
 
     private var handLandmarker: HandLandmarker? = null
+    @Volatile private var isReady = false
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val isProcessing = AtomicBoolean(false)
 
     init {
-        // Run MediaPipe setup on background thread so it doesn't block Flutter startup
-        Thread {
+        // Setup MediaPipe on background thread
+        executor.execute {
             try {
-                setupLandmarker("hand_landmarker.task")
+                setupLandmarker("models/hand_landmarker.task")
+                isReady = true
                 Log.d("MP_DEBUG", "MediaPipe ready")
             } catch (e: Exception) {
                 Log.e("MP_DEBUG", "MediaPipe setup failed: ${e.message}")
             }
-        }.start()
+        }
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -41,7 +46,21 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
                 val bytes  = call.argument<ByteArray>("bytes")!!
                 val width  = call.argument<Int>("width")!!
                 val height = call.argument<Int>("height")!!
-                result.success(processFrame(bytes, width, height))
+
+                // Drop frame if still processing previous one
+                if (!isProcessing.compareAndSet(false, true)) {
+                    Log.d("MP_DEBUG", "Frame dropped - still processing")
+                    result.success(null)
+                    return@setMethodCallHandler
+                }
+
+                executor.execute {
+                    val landmarks = processFrame(bytes, width, height)
+                    isProcessing.set(false)
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        result.success(landmarks)
+                    }
+                }
             } else {
                 result.notImplemented()
             }
@@ -49,6 +68,13 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
     }
 
     private fun setupLandmarker(modelPath: String) {
+
+        val cm = context.getSystemService(Context.CAMERA_SERVICE) as android.hardware.camera2.CameraManager
+        val cameraId = cm.cameraIdList[0] // 0 = back camera
+        val chars = cm.getCameraCharacteristics(cameraId)
+        val sensorOrientation = chars.get(android.hardware.camera2.CameraCharacteristics.SENSOR_ORIENTATION)
+        Log.d("MP_DEBUG", "Sensor orientation: $sensorOrientation")
+
         val options = HandLandmarkerOptions.builder()
             .setBaseOptions(
                 BaseOptions.builder()
@@ -65,10 +91,13 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
 
         handLandmarker = HandLandmarker.createFromOptions(context, options)
     }
-    private fun processFrame(bytes: ByteArray, width: Int, height: Int): List<Double>? {
 
-        if (handLandmarker == null) {
-            Log.d("MP_DEBUG", "handlandmarker is NULL")
+    private fun processFrame(bytes: ByteArray, width: Int, height: Int): List<Double>? {
+        Log.d("MP_DEBUG", "Frame: ${width}x${height}")
+
+
+        if (handLandmarker == null || !isReady) {
+            Log.d("MP_DEBUG", "MediaPipe not ready yet")
             return null
         }
 
@@ -78,26 +107,35 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
         val bitmap = BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
 
         val matrix = android.graphics.Matrix()
-        matrix.postRotate(90f)  // front camera usually needs 270, back needs 90
+        matrix.postRotate(90f)
         val rotatedBitmap = android.graphics.Bitmap.createBitmap(
             bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
         )
 
-        val mpImage = BitmapImageBuilder(bitmap).build()
+        val mpImage = BitmapImageBuilder(rotatedBitmap).build()
         val result  = handLandmarker?.detect(mpImage) ?: return null
 
-        if (result.landmarks().isEmpty()) {
+        val flat = if (result.landmarks().isEmpty()) {
             Log.d("MP_DEBUG", "No hand landmarks detected")
-            return null
+            null
+        } else {
+            val list = mutableListOf<Double>()
+            result.landmarks()[0].forEach { lm ->
+                list.add(lm.x().toDouble())
+                list.add(lm.y().toDouble())
+                list.add(lm.z().toDouble())
+            }
+            Log.d("MP_DEBUG", "Landmarks detected: ${result.landmarks().size}")
+            list
         }
 
-        val flat = mutableListOf<Double>()
-        result.landmarks()[0].forEach { lm ->
-            flat.add(lm.x().toDouble())
-            flat.add(lm.y().toDouble())
-            flat.add(lm.z().toDouble())
-        }
-        Log.d("MP_DEBUG", "Landmarks detected: ${result.landmarks().size}")
-        return flat  // 63 values
+        bitmap.recycle()
+        rotatedBitmap.recycle()
+        return flat
+    }
+
+    fun shutdown() {
+        executor.shutdown()
+        handLandmarker?.close()
     }
 }
