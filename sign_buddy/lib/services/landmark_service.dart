@@ -1,9 +1,28 @@
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
-
+import 'dart:math';
 class LandmarkService {
   static const _channel = MethodChannel('sign_buddy/mediapipe');
+
+  static List<double>? _normalize(List<double> landmarks){
+    if (landmarks.length != 63) return null;
+
+    final double wx = landmarks[0];
+    final double wy = landmarks[1];
+    final double wz = landmarks[2];
+
+    final centered = List<double>.generate(63, (i){
+      if(i%3==0) return landmarks[i] - wx;
+      if(i%3==1) return landmarks[i] - wy;
+      return landmarks[i] - wz;
+    });
+
+    final double maxVal = centered.map((v) => v.abs()).reduce(max);
+    if (maxVal == 0) return centered;
+
+    return centered.map((v) => v/maxVal).toList();
+  }
 
   static Future<List<double>?> extractLandmarks(CameraImage image) async {
     print("Planes: ${image.planes.length}");
@@ -20,7 +39,10 @@ class LandmarkService {
           });
 
       if (result == null) return null;
-      return List<double>.from(result);
+      final raw = List<double>.from(result);
+
+      return _normalize(raw);
+
     }
     catch (e) {
       print("LANDMARK ERROR; $e");
