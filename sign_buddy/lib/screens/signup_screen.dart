@@ -9,6 +9,11 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
+  bool isDark = AppState.isDark.value;
+  static final lightColor = AppState.lightColor;
+  static final darkColor = AppState.darkColor;
+
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -90,19 +95,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: AppState.isDark.value
-          ? Color(0xFF212842)
-          : Color(0xFFF0E7D5),
+      backgroundColor: isDark ? darkColor : lightColor,
 
       appBar: AppBar(
+        backgroundColor: isDark ? darkColor : lightColor,
+        foregroundColor: isDark ? lightColor : darkColor,
         leading: IconButton(
-          color: Colors.black,
-          iconSize: 30,
-          icon: Icon(
-            Icons.arrow_back,
-          ),
-
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/welcome');
           },
@@ -110,14 +111,9 @@ class _SignupScreenState extends State<SignupScreen> {
         title: Text(
           'Sign Buddy - Signup',
           style: TextStyle(
-            color: AppState.isDark.value
-                ? Color(0xFFF0E7D5)
-                : Color(0xFF212842),
+            color: isDark ? lightColor : darkColor,
           ),
         ),
-        backgroundColor: AppState.isDark.value
-            ? Color(0xFF212842)
-            : Color(0xFFF0E7D5),
       ),
 
       body: SingleChildScrollView(
@@ -134,164 +130,45 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppState.isDark.value
-                      ? Color(0xFFF0E7D5)
-                      : Color(0xFF212842),
+                  color: isDark ? lightColor : darkColor,
                 ),
               ),
 
               SizedBox(height: 32),
 
-              TextFormField(
-                controller: nameController,
-                validator: nameValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
+              buildField(nameController, 'Full Name', Icons.person, nameValidate),
               SizedBox(height: 16),
 
-              TextFormField(
-                controller: emailController,
-                validator: emailValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
+              buildField(emailController, 'Email', Icons.email, emailValidate),
               SizedBox(height: 16),
 
-              TextFormField(
-                controller: passwordController,
-                validator: passwordValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
+              buildField(passwordController, 'Password', Icons.lock, passwordValidate, obscure: true),
               SizedBox(height: 16),
 
-              TextFormField(
-                controller: confirmPasswordController,
-                validator: confirmPasswordValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  prefixIcon: Icon(Icons.lock_outline,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
+              buildField(confirmPasswordController, 'Confirm Password', Icons.lock_outline, confirmPasswordValidate, obscure: true),
               SizedBox(height: 16),
 
-              TextFormField(
-                controller: phoneController,
-                validator: phoneValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: InputDecoration(
-                  labelText: 'Phone',
-                  prefixIcon: Icon(Icons.call,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
+              buildField(phoneController, 'Phone', Icons.call, phoneValidate),
               SizedBox(height: 16),
 
-              TextFormField(
-                controller: ageController,
-                validator: ageValidate,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                decoration: InputDecoration(
-                  labelText: 'Age',
-                  prefixIcon: Icon(Icons.cake,
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+              buildField(ageController, 'Age', Icons.cake, ageValidate),
 
               SizedBox(height: 32),
 
               ElevatedButton(
                 onPressed: _isLoading ? null : submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppState.isDark.value
-                      ? Color(0xFFF0E7D5)
-                      : Color(0xFF212842),
+                  backgroundColor: isDark ? lightColor : darkColor,
+                  foregroundColor: isDark ? darkColor : lightColor,
                   padding: EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _isLoading
                     ? CircularProgressIndicator(
-                  color: AppState.isDark.value
-                      ? Color(0xFF212842)
-                      : Color(0xFFF0E7D5),
+                  color: isDark ? darkColor : lightColor,
                 )
                     : Text(
                   'Signup',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: AppState.isDark.value
-                        ? Color(0xFF212842)
-                        : Color(0xFFF0E7D5),
-                  ),
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
 
@@ -303,9 +180,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Text(
                     'Already have an account? ',
                     style: TextStyle(
-                      color: AppState.isDark.value
-                          ? Color(0xFFF0E7D5)
-                          : Color(0xFF212842),
+                      color: isDark ? lightColor : darkColor,
                     ),
                   ),
                   TextButton(
@@ -315,9 +190,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       'Login',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppState.isDark.value
-                            ? Color(0xFFF0E7D5)
-                            : Color(0xFF212842),
+                        color: isDark ? lightColor : darkColor,
                       ),
                     ),
                   ),
@@ -325,6 +198,31 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildField(
+      TextEditingController controller,
+      String label,
+      IconData icon,
+      String? Function(String?) validator, {
+        bool obscure = false,
+      }) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: isDark ? lightColor : darkColor),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
       ),
     );

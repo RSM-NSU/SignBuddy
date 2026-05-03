@@ -126,7 +126,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       _cameraController = CameraController(
         _cameras!.first,
-        ResolutionPreset.high,
+        ResolutionPreset.medium,
         enableAudio: false,
       );
 
@@ -152,7 +152,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       _interpreter = await Interpreter.fromAsset(
-        'assets/models/ccn_model.tflite',
+        'assets/models/asl_alphabet_model.tflite',
       );
 
       debugPrint(" Model loaded successfully");
@@ -195,9 +195,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void _onCameraFrame(CameraImage image) {
     print("Interpreter: $_interpreter");
     _frameCount++;
-    if (_frameCount % _frameSkip != 0) {
-      print("Processing frame...");
-      return;}
+    if (_frameCount % _frameSkip != 0) {return;}
     if (isProcessingFrame || _interpreter == null) return;
 
     final now = DateTime.now();
@@ -280,16 +278,20 @@ class _CameraScreenState extends State<CameraScreen> {
 
 
   // 🔹 STOP FUNCTION
-  void stopDetection() async {
-
-    if (_cameraController != null) {
-      await _cameraController!.stopImageStream();
+  void stopDetection() async{
+    try {
+      if (_cameraController != null &&
+          _cameraController!.value.isStreamingImages) {  // ← add this check
+        await _cameraController!.stopImageStream();
+      }
+    } catch (e) {
+      debugPrint('Stop stream error: $e');
     }
 
     final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null && detectedText.trim().isNotEmpty) {
-
+    if(user != null && detectedText.trim().isNotEmpty)
+    {
       await dbHelper.insertHistory(
         user.uid,
         detectedText,
@@ -297,7 +299,7 @@ class _CameraScreenState extends State<CameraScreen> {
       );
     }
 
-    setState(() {});
+    setState((){});
   }
 
   @override
@@ -437,7 +439,7 @@ class _CameraScreenState extends State<CameraScreen> {
               height: availableHeight * 0.35,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: isDark ? lightColor : darkColor,
+                color: isDark ? darkColor : lightColor,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -454,8 +456,8 @@ class _CameraScreenState extends State<CameraScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         color: isDark
-                            ? Colors.white.withAlpha(50)
-                            : Colors.black.withAlpha(100),
+                            ? lightColor
+                            : darkColor,
                       ),
                         child: SingleChildScrollView(
                           child: Text(
@@ -464,7 +466,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                 : detectedText,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isDark ? Colors.black : Colors.white,
+                              color: isDark ? darkColor : lightColor,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -486,11 +488,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         onPressed: startDetection,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.darkColor
-                              : AppState.lightColor,
+                              ? lightColor
+                              : darkColor,
                           foregroundColor: isDark
-                              ? AppState.lightColor
-                              : AppState.darkColor,
+                              ? darkColor
+                              : lightColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 25, vertical: 12),
                         ),
@@ -505,11 +507,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.darkColor
-                              : AppState.lightColor,
+                              ? lightColor
+                              : darkColor,
                           foregroundColor: isDark
-                              ? AppState.lightColor
-                              : AppState.darkColor,
+                              ? darkColor
+                              : lightColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                         ),
@@ -520,11 +522,11 @@ class _CameraScreenState extends State<CameraScreen> {
                         onPressed: stopDetection,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
-                              ? AppState.darkColor
-                              : AppState.lightColor,
+                              ? lightColor
+                              : darkColor,
                           foregroundColor: isDark
-                              ? AppState.lightColor
-                              : AppState.darkColor,
+                              ? darkColor
+                              : lightColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                         ),

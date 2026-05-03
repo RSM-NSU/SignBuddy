@@ -5,12 +5,18 @@ import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity: FlutterActivity() {
 
+    private lateinit var mediaPipeChannel: MediaPipeChannel
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-
-        MediaPipeChannel(
+        mediaPipeChannel = MediaPipeChannel(
             context = this,
             flutterEngine = flutterEngine
         )
+    }
+
+    override fun onDestroy() {
+        mediaPipeChannel.shutdown()
+        super.onDestroy()
     }
 }
