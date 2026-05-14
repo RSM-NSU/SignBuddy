@@ -304,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
+                Navigator.pushReplacementNamed(context, '/welcome_screen');
               },
             ),
           ],
