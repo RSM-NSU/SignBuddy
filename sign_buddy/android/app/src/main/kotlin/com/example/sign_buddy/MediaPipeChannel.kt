@@ -83,9 +83,9 @@ class MediaPipeChannel(private val context: Context, flutterEngine: FlutterEngin
                     .build()
             )
             .setNumHands(1)
-            .setMinHandDetectionConfidence(0.3f)
-            .setMinHandPresenceConfidence(0.3f)
-            .setMinTrackingConfidence(0.3f)
+            .setMinHandDetectionConfidence(0.5f)
+            .setMinHandPresenceConfidence(0.5f)
+            .setMinTrackingConfidence(0.5f)
             .setRunningMode(RunningMode.IMAGE)
             .build()
 

@@ -152,7 +152,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       _interpreter = await Interpreter.fromAsset(
-        'assets/models/asl_alphabet_model.tflite',
+        'assets/models/sign_buddy_model.tflite',
       );
 
       debugPrint(" Model loaded successfully");
