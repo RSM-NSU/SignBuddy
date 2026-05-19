@@ -1,5 +1,5 @@
 package com.example.sign_buddy
-
+import com.example.sign_buddy.MediaPipeChannel
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 

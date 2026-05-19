@@ -73,10 +73,13 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Color(0xFF212842)
           : Color(0xFFF0E7D5),
       appBar: AppBar(
-        title: Text('Sign Buddy - Login'),
+        title: Text('Sign Buddy - Login',style: TextStyle(
+          color: AppState.isDark.value ? AppState.lightColor:AppState.darkColor,
+
+        ),),
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          color: Colors.black,
+          color: AppState.isDark.value ? AppState.lightColor:AppState.darkColor,
           iconSize: 30,
           icon: Icon(
             Icons.arrow_back,
