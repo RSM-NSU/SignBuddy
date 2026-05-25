@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:sign_buddy/services/landmark_service.dart';
 import 'package:sign_buddy/services/label_encoder_service.dart';
+import 'package:sign_buddy/services/llm_service.dart';
 
 enum DetectionMode { alphabet, word }
 
@@ -40,7 +41,8 @@ class _CameraScreenState extends State<CameraScreen> {
   bool isDark = AppState.isDark.value;
   static final lightColor = AppState.lightColor;
   static final darkColor  = AppState.darkColor;
-
+  final LlmService _llm = LlmService();
+  bool _isProcessingLLM = false;
   CameraController?        _cameraController;
   List<CameraDescription>? _cameras;
 
@@ -317,6 +319,21 @@ class _CameraScreenState extends State<CameraScreen> {
     } catch (e) {
       debugPrint('Stop stream error: $e');
     }
+
+    if (detectedText.trim().isNotEmpty){
+      setState(() {
+        _isProcessingLLM = true;
+      });
+        final cleaned = await _llm.processTranslation(detectedText.trim());
+
+        setState(() {
+          detectedText = cleaned;
+          _isProcessingLLM = false;
+        });
+
+    }
+
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && detectedText.trim().isNotEmpty) {
       await dbHelper.insertHistory(
@@ -536,7 +553,24 @@ class _CameraScreenState extends State<CameraScreen> {
                           borderRadius: BorderRadius.circular(10),
                           color: isDark ? lightColor : darkColor,
                         ),
-                        child: SingleChildScrollView(
+                        child: _isProcessingLLM ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: isDark? darkColor:lightColor,
+                              ),
+                              const SizedBox(height: 0,),
+                          Text(
+                            "Processing...",
+                            style: TextStyle(
+                              color: isDark ? darkColor : lightColor,
+                              fontSize: 14,
+                            ),
+                          )],
+                          ),
+
+                        ):SingleChildScrollView(
                           child: Text(
                             detectedText.trim().isEmpty
                                 ? predictionLabel
@@ -582,7 +616,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
 
                         ElevatedButton(
-                          onPressed: stopDetection,
+                          onPressed: _isProcessingLLM ? null : stopDetection,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isDark ? lightColor : darkColor,
                             foregroundColor: isDark ? darkColor : lightColor,
