@@ -407,7 +407,7 @@ class _CameraScreenState extends State<CameraScreen> {
       body: SafeArea(
         child: hasError
 
-        // ── ERROR ──
+        // ── ERROR
             ? Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -503,8 +503,9 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                   ),
 
-                  // LIVE / IDLE badge
+                  // LIVE - IDLE badge
                   Positioned(
+
                     top: 20,
                     right: 20,
                     child: Container(
@@ -586,7 +587,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     ),
 
-                    // Buttons
+                    // Buttonss
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
