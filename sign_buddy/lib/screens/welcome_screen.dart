@@ -81,7 +81,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
               SizedBox(height: 10),
 
-              // Divider linee
+              // Divider line
               Row(
                 children: [
                   Expanded(child: Divider(color: (isDark ? lightColor : darkColor).withOpacity(0.2))),
@@ -150,7 +150,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
               SizedBox(height: 14),
 
-              // Guest button
+              // Guest button — slightly muted style
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 54),
