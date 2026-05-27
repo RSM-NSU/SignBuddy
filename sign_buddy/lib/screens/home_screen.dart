@@ -214,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (_) => const AlertDialog(
                     title: Text('Sign Buddy'),
                     content: Text(
-                        'Sign Buddy converts sign language into text and speech.'),
+                      'Sign Buddy is a Sign Language Recognition application that translates hand gestures into text and speech in real time. The app uses Artificial Intelligence and hand tracking technology to recognize sign language through the device camera. It provides an accessible and user-friendly platform to improve communication and includes features such as translation history, secure login, and sign language learning support.',
+                    ),
                   ),
                 );
               },
