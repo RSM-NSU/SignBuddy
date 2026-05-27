@@ -117,7 +117,7 @@ class _GuestHomeState extends State<GuestHome> {
                       : Color(0xFF212842),
                 ),
               ),
-              accountEmail: Text(""),
+              accountEmail: Text(" "),
               currentAccountPicture: GestureDetector(
                 onTap: showLoginDialog,
                 child: CircleAvatar(
