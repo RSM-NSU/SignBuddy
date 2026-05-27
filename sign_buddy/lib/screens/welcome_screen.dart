@@ -81,7 +81,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
               SizedBox(height: 10),
 
-              // Divider line
+              // Divider linee
               Row(
                 children: [
                   Expanded(child: Divider(color: (isDark ? lightColor : darkColor).withOpacity(0.2))),
