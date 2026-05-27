@@ -10,7 +10,7 @@ class LlmService {
       final apiKey = dotenv.env['GEMINI_API_KEY'];
 
       if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('GEMINI_API_KEY not found in .env');
+        throw Exception('GEMINI_API_KEY not found in ..env');
       }
 
       _model = GenerativeModel(
