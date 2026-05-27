@@ -363,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Learn ASL Signs\nTap to explore alphabets & words',
+                                'Learn ASL Sign\nTap to explore alphabets & words',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
