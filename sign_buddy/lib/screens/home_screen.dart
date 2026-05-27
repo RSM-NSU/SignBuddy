@@ -198,8 +198,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   context: context,
                   builder: (_) => AlertDialog(
                     title: const Text('Help'),
-                    content: const Text('Email us at saudmasood010@gmail.com'),
-                  ),
+                    content: const Text(
+                      'For assistance, technical support, feedback, or inquiries regarding the application, please contact our support team via email.\n\nEmail: saudmasood010@gmail.com\n\nWe are committed to providing assistance and improving your experience with Sign Buddy.',
+                    ),
+                  )
                 );
               },
             ),
