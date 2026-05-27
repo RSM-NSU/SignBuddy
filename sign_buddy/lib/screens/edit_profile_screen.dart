@@ -37,7 +37,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() {});
   }
 
-
   Future<void> pickImage() async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -49,7 +48,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (user == null) return;
 
       final uid = user.uid;
-
       await prefs.setString('profileImage_$uid', image.path);
 
       setState(() {
@@ -57,7 +55,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
     }
   }
-
 
   Future<void> saveProfile() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -73,57 +70,94 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppState.isDark.value
+          ? Color(0xFF212842)
+          : Color(0xFFF0E7D5),
+
       appBar: AppBar(
         title: Text(
           'Edit Profile',
           style: TextStyle(
-            color: AppState.isDark.value
-                ? Color(0xFFF0E7D5)
-                : Color(0xFF212842),
+            color: AppState.isDark.value ? Color(0xFFF0E7D5) : Color(0xFF212842),
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: AppState.isDark.value
             ? Color(0xFF212842)
             : Color(0xFFF0E7D5),
+        elevation: 0,
         iconTheme: IconThemeData(
-          color: AppState.isDark.value
-              ? Color(0xFFF0E7D5)
-              : Color(0xFF212842),
+          color: AppState.isDark.value ? Color(0xFFF0E7D5) : Color(0xFF212842),
         ),
       ),
 
-      backgroundColor: AppState.isDark.value
-          ? Color(0xFF212842)
-          : Color(0xFFF0E7D5),
-
-      body: Padding(
-        padding: EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
-            GestureDetector(
-              onTap: pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: AppState.isDark.value
-                    ? Color(0xFFF0E7D5)
-                    : Color(0xFF212842),
-                backgroundImage:
-                profileImage != null ? FileImage(profileImage!) : null,
-                child: profileImage == null
-                    ? Icon(
-                  Icons.person,
-                  size: 50,
-                  color: AppState.isDark.value
-                      ? Color(0xFF212842)
-                      : Color(0xFFF0E7D5),
-                )
-                    : null,
-              ),
-            ),
 
             SizedBox(height: 20),
 
+            // ── Profile Picture
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor: AppState.isDark.value
+                      ? Color(0xFFF0E7D5)
+                      : Color(0xFF212842),
+                  backgroundImage: profileImage != null
+                      ? FileImage(profileImage!)
+                      : null,
+                  child: profileImage == null
+                      ? Icon(
+                    Icons.person,
+                    size: 60,
+                    color: AppState.isDark.value
+                        ? Color(0xFF212842)
+                        : Color(0xFFF0E7D5),
+                  )
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: pickImage,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppState.isDark.value
+                          ? Color(0xFFF0E7D5)
+                          : Color(0xFF212842),
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 18,
+                        color: AppState.isDark.value
+                            ? Color(0xFF212842)
+                            : Color(0xFFF0E7D5),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 8),
+
+            Text(
+              'Tap camera to change photo',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppState.isDark.value
+                    ? Color(0xFFF0E7D5).withOpacity(0.5)
+                    : Color(0xFF212842).withOpacity(0.5),
+              ),
+            ),
+
+            SizedBox(height: 40),
+
+            // ── Name Field
             TextField(
               controller: nameController,
               style: TextStyle(
@@ -133,12 +167,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               decoration: InputDecoration(
                 labelText: 'Full Name',
+                prefixIcon: Icon(
+                  Icons.person_outline,
+                  color: AppState.isDark.value
+                      ? Color(0xFFF0E7D5)
+                      : Color(0xFF212842),
+                ),
                 labelStyle: TextStyle(
                   color: AppState.isDark.value
                       ? Color(0xFFF0E7D5)
                       : Color(0xFF212842),
                 ),
                 enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
                     color: AppState.isDark.value
                         ? Color(0xFFF0E7D5)
@@ -146,7 +187,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
+                    width: 2,
                     color: AppState.isDark.value
                         ? Color(0xFFF0E7D5)
                         : Color(0xFF212842),
@@ -155,26 +198,78 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ),
 
-            SizedBox(height: 30),
+            SizedBox(height: 20),
 
+            // Email Field
+            TextField(
+              readOnly: true,
+              style: TextStyle(
+                color: AppState.isDark.value
+                    ? Color(0xFFF0E7D5).withOpacity(0.5)
+                    : Color(0xFF212842).withOpacity(0.5),
+              ),
+              controller: TextEditingController(
+                text: FirebaseAuth.instance.currentUser?.email ?? '',
+              ),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(
+                  Icons.email_outlined,
+                  color: AppState.isDark.value
+                      ? Color(0xFFF0E7D5).withOpacity(0.5)
+                      : Color(0xFF212842).withOpacity(0.5),
+                ),
+                labelStyle: TextStyle(
+                  color: AppState.isDark.value
+                      ? Color(0xFFF0E7D5).withOpacity(0.5)
+                      : Color(0xFF212842).withOpacity(0.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppState.isDark.value
+                        ? Color(0xFFF0E7D5).withOpacity(0.3)
+                        : Color(0xFF212842).withOpacity(0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppState.isDark.value
+                        ? Color(0xFFF0E7D5).withOpacity(0.3)
+                        : Color(0xFF212842).withOpacity(0.3),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 40),
+
+            // ── Save Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: Size(double.infinity, 54),
                 backgroundColor: AppState.isDark.value
                     ? Color(0xFFF0E7D5)
                     : Color(0xFF212842),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
               ),
               onPressed: saveProfile,
               child: Text(
                 'Save Profile',
                 style: TextStyle(
                   fontSize: 18,
+                  fontWeight: FontWeight.bold,
                   color: AppState.isDark.value
                       ? Color(0xFF212842)
                       : Color(0xFFF0E7D5),
                 ),
               ),
             ),
+
           ],
         ),
       ),
