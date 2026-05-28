@@ -68,9 +68,35 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+
+      UserCredential userCredential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
+      );
+
+      // sen email verfy
+      await userCredential.user!.sendEmailVerification();
+
+      // POPUP DIALOG
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Verify Email'),
+          content: Text(
+            'A verification email has been sent to:\n\n${emailController.text.trim()}\n\nPlease check your Gmail and verify your account before login.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // close popup
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
 
       Flushbar(
@@ -80,7 +106,6 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: Colors.green,
       ).show(context);
 
-      Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
       Flushbar(
         title: 'Error',
