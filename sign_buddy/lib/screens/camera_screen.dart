@@ -184,21 +184,77 @@ class _CameraScreenState extends State<CameraScreen> {
     if (!mounted) return;
     setState(() { predictionLabel = "Ready! Tap Start to begin"; });
   }
+  void _onToggleMode(
+      bool isWordMode,
+      ) async {
 
-  void _onToggleMode(bool isWordMode) async {
+    // Stop old speech
+    await _flutterTts.stop();
+
+    // Better loud voice settings
+    await _flutterTts.setLanguage(
+      "en-US",
+    );
+
+    await _flutterTts.setEngine(
+      "com.google.android.tts",
+    );
+
+    await _flutterTts.setSpeechRate(
+      0.35,
+    );
+
+    await _flutterTts.setPitch(
+      0.85,
+    );
+
+    await _flutterTts.setVolume(
+      1.0,
+    );
+
     if (_cameraController != null &&
-        _cameraController!.value.isStreamingImages) {
-      await _cameraController!.stopImageStream();
+        _cameraController!
+            .value
+            .isStreamingImages) {
+
+      await _cameraController!
+          .stopImageStream();
     }
+
     setState(() {
-      _detectionMode  = isWordMode ? DetectionMode.word : DetectionMode.alphabet;
-      detectedText    = "";
-      predictionLabel = _detectionMode == DetectionMode.alphabet
+
+      _detectionMode =
+      isWordMode
+          ? DetectionMode.word
+          : DetectionMode.alphabet;
+
+      detectedText = "";
+
+      predictionLabel =
+      _detectionMode ==
+          DetectionMode.alphabet
           ? "ASL Alphabet mode — Tap Start"
           : "Word Level mode — Tap Start";
-      lastPrediction  = "";
-      isLastWasSpace  = false;
+
+      lastPrediction = "";
+
+      isLastWasSpace = false;
     });
+
+    // SPEAK MODE CHANGE
+
+    if (isWordMode) {
+
+      await _flutterTts.speak(
+        "Word level model activated",
+      );
+
+    } else {
+
+      await _flutterTts.speak(
+        "Alphabet model activated",
+      );
+    }
   }
 
   void startDetection() {
