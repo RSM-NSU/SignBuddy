@@ -81,24 +81,71 @@ class _SignupScreenState extends State<SignupScreen> {
       // POPUP DIALOG
       showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Text('Verify Email'),
-          content: Text(
-            'A verification email has been sent to:\n\n${emailController.text.trim()}\n\nPlease check your Gmail and verify your account before login.',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
+
+          title: Row(
+            children: [
+              Icon(
+                Icons.mark_email_read,
+                color: AppState.isDark.value
+                    ? AppState.lightColor
+                    : AppState.darkColor,
+              ),
+
+              const SizedBox(width: 10),
+
+              Text(
+                "Verify Email",
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ? AppState.lightColor
+                      : AppState.darkColor,
+                ),
+              ),
+            ],
+          ),
+
+          backgroundColor: AppState.isDark.value
+              ? AppState.darkColor
+              : AppState.lightColor,
+
+          content: Text(
+            "Verification email sent to:\n\n${emailController.text.trim()}\n\nPlease check Gmail and verify your account.",
+            style: TextStyle(
+              color: AppState.isDark.value
+                  ? AppState.lightColor
+                  : AppState.darkColor,
+            ),
+          ),
+
           actions: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                AppState.isDark.value
+                    ? AppState.lightColor
+                    : AppState.darkColor,
+              ),
               onPressed: () {
-                Navigator.pop(context); // close popup
-                Navigator.pushReplacementNamed(context, '/login');
+                Navigator.pop(context);
+                Navigator.pushReplacementNamed(
+                    context, '/login');
               },
-              child: const Text('OK'),
+              child: Text(
+                "OK",
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ? AppState.darkColor
+                      : AppState.lightColor,
+                ),
+              ),
             ),
           ],
         ),
       );
-
       Flushbar(
         title: 'Success',
         message: 'Account created successfully',
