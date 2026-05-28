@@ -58,39 +58,94 @@ class _LoginScreenState extends State<LoginScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Email Not Verified'),
-              content: const Text(
-                'Please verify your email first before login. Check your Gmail inbox.',
+              backgroundColor:
+              AppState.isDark.value
+                  ? AppState.darkColor
+                  : AppState.lightColor,
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
+
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.warning,
+                    color: AppState.isDark.value
+                        ? AppState.lightColor
+                        : AppState.darkColor,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "Email Not Verified",
+                    style: TextStyle(
+                      color: AppState.isDark.value
+                          ? AppState.lightColor
+                          : AppState.darkColor,
+                    ),
+                  ),
+                ],
+              ),
+
+              content: Text(
+                "Please verify your email first.\n\nCheck Gmail inbox.",
+                style: TextStyle(
+                  color: AppState.isDark.value
+                      ? AppState.lightColor
+                      : AppState.darkColor,
+                ),
+              ),
+
               actions: [
+
                 TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Close",
+                    style: TextStyle(
+                      color: AppState.isDark.value
+                          ? AppState.lightColor
+                          : AppState.darkColor,
+                    ),
+                  ),
+                ),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    AppState.isDark.value
+                        ? AppState.lightColor
+                        : AppState.darkColor,
+                  ),
                   onPressed: () async {
 
-                    // resend verification email
                     await user.sendEmailVerification();
 
                     Navigator.pop(context);
 
                     Flushbar(
                       title: 'Verification Sent',
-                      message: 'Verification email sent again',
-                      duration: const Duration(seconds: 3),
+                      message:
+                      'Email sent again. Check Gmail.',
+                      duration:
+                      const Duration(seconds: 3),
                       backgroundColor: Colors.orange,
                     ).show(context);
                   },
-                  child: const Text('Resend Email'),
-                ),
-
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('OK'),
+                  child: Text(
+                    "Resend",
+                    style: TextStyle(
+                      color: AppState.isDark.value
+                          ? AppState.darkColor
+                          : AppState.lightColor,
+                    ),
+                  ),
                 ),
               ],
             ),
           );
-
           return;
         }
 
