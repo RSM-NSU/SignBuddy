@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:sign_buddy/lib/database/db_helper.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -43,6 +43,10 @@ class _CameraScreenState extends State<CameraScreen> {
   static final darkColor  = AppState.darkColor;
   final LlmService _llm = LlmService();
   bool _isProcessingLLM = false;
+
+  // ── TTS (ADDED) ──
+  final FlutterTts _flutterTts = FlutterTts();
+
   CameraController?        _cameraController;
   List<CameraDescription>? _cameras;
 
@@ -320,19 +324,20 @@ class _CameraScreenState extends State<CameraScreen> {
       debugPrint('Stop stream error: $e');
     }
 
-    if (detectedText.trim().isNotEmpty){
+    if (detectedText.trim().isNotEmpty) {
       setState(() {
         _isProcessingLLM = true;
       });
-        final cleaned = await _llm.processTranslation(detectedText.trim());
+      final cleaned = await _llm.processTranslation(detectedText.trim());
 
-        setState(() {
-          detectedText = cleaned;
-          _isProcessingLLM = false;
-        });
+      setState(() {
+        detectedText     = cleaned;
+        _isProcessingLLM = false;
+      });
 
+      // ── AUTO SPEAK after LLM done (ADDED) ──
+      _speak();
     }
-
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && detectedText.trim().isNotEmpty) {
@@ -345,11 +350,25 @@ class _CameraScreenState extends State<CameraScreen> {
     setState(() {});
   }
 
+  // ── SPEAK HELPER (ADDED) ──
+  Future<void> _speak() async {
+    if (detectedText.trim().isEmpty) return;
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(1.0);
+
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.awaitSpeakCompletion(true);
+    await _flutterTts.setEngine("com.google.android.tts");
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.speak(detectedText.trim());
+  }
+
   @override
   void dispose() {
     _cameraController?.dispose();
     _alphabetInterpreter?.close();
     _wordInterpreter?.close();
+    _flutterTts.stop(); // ── TTS CLEANUP (ADDED) ──
     super.dispose();
   }
 
@@ -407,7 +426,7 @@ class _CameraScreenState extends State<CameraScreen> {
       body: SafeArea(
         child: hasError
 
-        // ── ERROR
+        // ── ERROR ──
             ? Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -503,9 +522,8 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                   ),
 
-                  // LIVE - IDLE badge
+                  // LIVE / IDLE badge
                   Positioned(
-
                     top: 20,
                     right: 20,
                     child: Container(
@@ -554,24 +572,26 @@ class _CameraScreenState extends State<CameraScreen> {
                           borderRadius: BorderRadius.circular(10),
                           color: isDark ? lightColor : darkColor,
                         ),
-                        child: _isProcessingLLM ? Center(
+                        child: _isProcessingLLM
+                            ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircularProgressIndicator(
-                                color: isDark? darkColor:lightColor,
+                                color: isDark ? darkColor : lightColor,
                               ),
-                              const SizedBox(height: 0,),
-                          Text(
-                            "Processing...",
-                            style: TextStyle(
-                              color: isDark ? darkColor : lightColor,
-                              fontSize: 14,
-                            ),
-                          )],
+                              const SizedBox(height: 0),
+                              Text(
+                                "Processing...",
+                                style: TextStyle(
+                                  color: isDark ? darkColor : lightColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-
-                        ):SingleChildScrollView(
+                        )
+                            : SingleChildScrollView(
                           child: Text(
                             detectedText.trim().isEmpty
                                 ? predictionLabel
@@ -587,9 +607,11 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     ),
 
-                    // Buttonss
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Buttons
+                    Wrap(
+                      alignment: WrapAlignment.spaceEvenly,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
 
                         ElevatedButton(
@@ -597,23 +619,30 @@ class _CameraScreenState extends State<CameraScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isDark ? lightColor : darkColor,
                             foregroundColor: isDark ? darkColor : lightColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                           ),
                           child: const Text("Start"),
                         ),
 
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() { detectedText = ""; });
-                          },
+                          onPressed: () { setState(() { detectedText = ""; }); },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isDark ? lightColor : darkColor,
                             foregroundColor: isDark ? darkColor : lightColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                           ),
-                          child: const Text("CLEAR"),
+                          child: const Text("Clear"),
+                        ),
+
+                        ElevatedButton.icon(
+                          onPressed: _isProcessingLLM ? null : _speak,
+                          icon: const Icon(Icons.volume_up, size: 18),
+                          label: const Text("Speak"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark ? lightColor : darkColor,
+                            foregroundColor: isDark ? darkColor : lightColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          ),
                         ),
 
                         ElevatedButton(
@@ -621,10 +650,9 @@ class _CameraScreenState extends State<CameraScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isDark ? lightColor : darkColor,
                             foregroundColor: isDark ? darkColor : lightColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                           ),
-                          child: const Text("STOP"),
+                          child: const Text("Stop"),
                         ),
 
                       ],
