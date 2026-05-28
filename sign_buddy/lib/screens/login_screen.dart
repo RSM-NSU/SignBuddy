@@ -38,29 +38,81 @@ class _LoginScreenState extends State<LoginScreen> {
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
       try {
+
+        UserCredential userCredential =
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
         );
 
+        // reload user data
+        await userCredential.user!.reload();
+
+        User? user = FirebaseAuth.instance.currentUser;
+
+        // CHECK EMAIL VERIFIED
+        if (user != null && !user.emailVerified) {
+
+          await FirebaseAuth.instance.signOut();
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Email Not Verified'),
+              content: const Text(
+                'Please verify your email first before login. Check your Gmail inbox.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+
+                    // resend verification email
+                    await user.sendEmailVerification();
+
+                    Navigator.pop(context);
+
+                    Flushbar(
+                      title: 'Verification Sent',
+                      message: 'Verification email sent again',
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.orange,
+                    ).show(context);
+                  },
+                  child: const Text('Resend Email'),
+                ),
+
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+
+          return;
+        }
+
         Flushbar(
           title: 'Login Successful',
           message: 'Welcome ${emailController.text}',
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
           backgroundColor: Colors.green,
           flushbarPosition: FlushbarPosition.TOP,
-          icon: Icon(Icons.check_circle, color: Colors.white),
+          icon: const Icon(Icons.check_circle, color: Colors.white),
         ).show(context);
 
         Navigator.pushReplacementNamed(context, '/home');
+
       } catch (e) {
         Flushbar(
           title: 'Login Failed',
           message: e.toString(),
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
           backgroundColor: Colors.red,
           flushbarPosition: FlushbarPosition.TOP,
-          icon: Icon(Icons.error, color: Colors.white),
+          icon: const Icon(Icons.error, color: Colors.white),
         ).show(context);
       }
     }
