@@ -153,33 +153,65 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ListTile(
               leading: Icon(Icons.help, color: isDark ? lightColor : darkColor),
-              title: Text('Help & Support',
-                  style: TextStyle(color: isDark ? lightColor : darkColor)),
+              title: Text(
+                'Help & Support',
+                style: TextStyle(color: isDark ? lightColor : darkColor),
+              ),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
-                    title: const Text('Help'),
-                    content: const Text(
-                      'For assistance, technical support, feedback, or inquiries regarding the application, please contact our support team via email.\n\nEmail: saudmasood010@gmail.com\n\nWe are committed to providing assistance and improving your experience with Sign Buddy.',
+                    backgroundColor: isDark ? darkColor : lightColor,
+                    title: Text(
+                      'Help',
+                      style: TextStyle(color: isDark ? lightColor : darkColor),
                     ),
-                    )
+                    content: Text(
+                      'For assistance, technical support, feedback, or inquiries regarding the application, please contact our support team via email.\n\nEmail: saudmasood010@gmail.com\n\nWe are committed to providing assistance and improving your experience with Sign Buddy.',
+                      style: TextStyle(color: isDark ? lightColor : darkColor),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'OK',
+                          style: TextStyle(color: isDark ? lightColor : darkColor),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
 
             ListTile(
               leading: Icon(Icons.info, color: isDark ? lightColor : darkColor),
-              title: Text('About App',
-                  style: TextStyle(color: isDark ? lightColor : darkColor)),
+              title: Text(
+                'About App',
+                style: TextStyle(color: isDark ? lightColor : darkColor),
+              ),
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (_) => const AlertDialog(
-                    title: Text('Sign Buddy'),
+                  builder: (_) => AlertDialog(
+                    backgroundColor: isDark ? darkColor : lightColor,
+                    title: Text(
+                      'Sign Buddy',
+                      style: TextStyle(color: isDark ? lightColor : darkColor),
+                    ),
                     content: Text(
                       'Sign Buddy is a Sign Language Recognition application that translates hand gestures into text and speech in real time. The app uses Artificial Intelligence and hand tracking technology to recognize sign language through the device camera. It provides an accessible and user-friendly platform to improve communication and includes features such as translation history, secure login, and sign language learning support.',
+                      style: TextStyle(color: isDark ? lightColor : darkColor),
                     ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'OK',
+                          style: TextStyle(color: isDark ? lightColor : darkColor),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
