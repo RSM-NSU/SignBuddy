@@ -78,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
       // sen email verfy
       await userCredential.user!.sendEmailVerification();
 
-      // POPUP DIALOG
+      // POPUP DIALOg
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
