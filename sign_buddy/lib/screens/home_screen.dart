@@ -17,7 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   var lightColor = AppState.lightColor;
   var darkColor = AppState.darkColor;
 
-  int _currentIndex = 0; // 0=Home, 1=History, 2=Account
 
   @override
   void initState() {
@@ -65,22 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onBottomNavTap(int index) {
-    if (index == _currentIndex) return;
-    setState(() => _currentIndex = index);
 
-    if (index == 1) {
-      // History
-      Navigator.pushNamed(context, '/history');
-      setState(() => _currentIndex = 0); // reset after navigation
-    } else if (index == 2) {
-      // Account  navigate to edit profile
-      Navigator.pushNamed(context, '/edit').then((result) {
-        if (result == true) loadProfileImage();
-        setState(() => _currentIndex = 0);
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,28 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       backgroundColor: isDark ? darkColor : lightColor,
 
-      // Bottom navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onBottomNavTap,
-        backgroundColor: isDark ? darkColor : lightColor,
-        selectedItemColor: isDark ? lightColor : darkColor,
-        unselectedItemColor: (isDark ? lightColor : darkColor).withOpacity(0.4),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
-      ),
 
       drawer: Drawer(
         backgroundColor: isDark ? darkColor : lightColor,
