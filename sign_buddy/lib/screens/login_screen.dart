@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         User? user = FirebaseAuth.instance.currentUser;
 
-        // CHECK EMAIL VERIFIED
+        // CHECK EMAIL VERIFIEd
         if (user != null && !user.emailVerified) {
 
           await FirebaseAuth.instance.signOut();
