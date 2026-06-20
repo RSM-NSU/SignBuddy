@@ -84,7 +84,7 @@ class _CameraScreenState extends State<CameraScreen> {
   DateTime lastAddedTime  = DateTime.now();
 
   int      _frameCount      = 0;
-  static const int _frameSkip = 3;
+  static const int _frameSkip = 5;
   DateTime _lastProcessTime = DateTime.now();
 
   static const List<String> _wordLabels = [
@@ -191,7 +191,7 @@ class _CameraScreenState extends State<CameraScreen> {
     // Stop old speech
     await _flutterTts.stop();
 
-    // Better loud voice settings
+
     await _flutterTts.setLanguage(
       "en-US",
     );
@@ -277,7 +277,7 @@ class _CameraScreenState extends State<CameraScreen> {
     if (isProcessingFrame || _interpreter == null) return;
 
     final now = DateTime.now();
-    if (now.difference(_lastProcessTime).inMilliseconds < 100) return;
+    if (now.difference(_lastProcessTime).inMilliseconds < 150) return;
     _lastProcessTime  = now;
     isProcessingFrame = true;
 
@@ -361,7 +361,7 @@ class _CameraScreenState extends State<CameraScreen> {
     if (maxConfidence < 0.7) return;
     final now = DateTime.now();
     if (newPrediction == lastPrediction &&
-        now.difference(lastAddedTime).inMilliseconds < 1500) return;
+        now.difference(lastAddedTime).inMilliseconds < 2000) return;
     lastPrediction = newPrediction;
     lastAddedTime  = now;
     final cleanWord = newPrediction.replaceAll(RegExp(r'\d+$'), '');
@@ -409,14 +409,32 @@ class _CameraScreenState extends State<CameraScreen> {
   // ── SPEAK HELPER (ADDED) ──
   Future<void> _speak() async {
     if (detectedText.trim().isEmpty) return;
-    await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(1.0);
 
-    await _flutterTts.setPitch(1.0);
+    await _flutterTts.stop();
+
+    await _flutterTts.setLanguage("en-US");
+
+    await _flutterTts.setEngine(
+      "com.google.android.tts",
+    );
+
+    await _flutterTts.setSpeechRate(
+      0.3,
+    );
+
+    await _flutterTts.setPitch(
+      0.90,
+    );
+
+    await _flutterTts.setVolume(
+      1.0,
+    );
+
     await _flutterTts.awaitSpeakCompletion(true);
-    await _flutterTts.setEngine("com.google.android.tts");
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.speak(detectedText.trim());
+
+    await _flutterTts.speak(
+      detectedText.trim(),
+    );
   }
 
   @override
@@ -424,7 +442,7 @@ class _CameraScreenState extends State<CameraScreen> {
     _cameraController?.dispose();
     _alphabetInterpreter?.close();
     _wordInterpreter?.close();
-    _flutterTts.stop(); // ── TTS CLEANUP (ADDED) ──
+    _flutterTts.stop(); // TTS CLEANUP aded
     super.dispose();
   }
 
