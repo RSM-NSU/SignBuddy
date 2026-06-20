@@ -252,9 +252,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 30, 20, 20), // ← top space added
           color: isDark ? darkColor : lightColor,
           child: Column(
+
             children: [
 
               Lottie.asset(
