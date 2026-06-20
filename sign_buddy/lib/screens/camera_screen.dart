@@ -82,6 +82,9 @@ class _CameraScreenState extends State<CameraScreen> {
   bool     isLastWasSpace = false;
   String   lastPrediction = "";
   DateTime lastAddedTime  = DateTime.now();
+  bool _isCooldown = false;
+
+  static const int cooldownMs = 2000; // 2 seconds
 
   int      _frameCount      = 0;
   static const int _frameSkip = 5;
@@ -331,8 +334,10 @@ class _CameraScreenState extends State<CameraScreen> {
         newPrediction == "NOTHING" ||
         newPrediction == "SPACE") {
       final now = DateTime.now();
+      if (_isCooldown) return;
+
       if (newPrediction == lastPrediction &&
-          now.difference(lastAddedTime).inMilliseconds < 800) return;
+          now.difference(lastAddedTime).inMilliseconds < cooldownMs) return;
       lastPrediction = newPrediction;
       lastAddedTime  = now;
       if (newPrediction == "DEL") {
@@ -352,7 +357,15 @@ class _CameraScreenState extends State<CameraScreen> {
         isLastWasSpace  = false;
       }
       setState(() {});
-    }
+
+      _isCooldown = true;
+
+      Future.delayed(
+        const Duration(milliseconds: cooldownMs),
+            () {
+          _isCooldown = false;
+        },
+      );    }
   }
 
   void _handleWordPrediction(String newPrediction, double maxConfidence) {
@@ -360,14 +373,27 @@ class _CameraScreenState extends State<CameraScreen> {
     if (user == null) return;
     if (maxConfidence < 0.7) return;
     final now = DateTime.now();
+    if (_isCooldown) return;
+
     if (newPrediction == lastPrediction &&
-        now.difference(lastAddedTime).inMilliseconds < 2000) return;
+        now.difference(lastAddedTime).inMilliseconds < cooldownMs) return;
     lastPrediction = newPrediction;
     lastAddedTime  = now;
     final cleanWord = newPrediction.replaceAll(RegExp(r'\d+$'), '');
     setState(() {
-      detectedText = detectedText.isEmpty ? cleanWord : "$detectedText $cleanWord";
+      detectedText = detectedText.isEmpty
+          ? cleanWord
+          : "$detectedText $cleanWord";
     });
+
+    _isCooldown = true;
+
+    Future.delayed(
+      const Duration(milliseconds: cooldownMs),
+          () {
+        _isCooldown = false;
+      },
+    );
   }
 
   void stopDetection() async {
