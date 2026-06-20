@@ -33,12 +33,12 @@ dependencies:
   google_generative_ai: ^0.4.6
   flutter_dotenv: ^5.1.0
   flutter_tts: ^4.0.0
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_native_splash: ^2.4.4
 
 flutter:
   uses-material-design: true
@@ -66,6 +66,6 @@ flutter:
 flutter_native_splash:
   color: "#000000"
   image: assets/images/logo.png
-  android: true
+  android: false
   ios: true
   fullscreen: true
