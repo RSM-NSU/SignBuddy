@@ -59,6 +59,8 @@ flutter:
     - assets/models/sign_buddy_model.tflite
     - assets/models/labels.json
     - assets/.env
+    - assets/models/asl_250_unrolled.tflite
+    - assets/models/250_word_labels.json
 
   fonts:
     - family: PermanentMarker

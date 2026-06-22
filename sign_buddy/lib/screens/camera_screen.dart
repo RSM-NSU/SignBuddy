@@ -90,13 +90,51 @@ class _CameraScreenState extends State<CameraScreen> {
   static const int _frameSkip = 5;
   DateTime _lastProcessTime = DateTime.now();
 
+  // ── WORD MODEL FRAME BUFFER (ADDED) ──
+  static const int _wordSequenceLength = 32;
+  final List<List<double>> _frameBuffer = [];
+
   static const List<String> _wordLabels = [
-    "AXE1", "BACKPACK1", "BASKETBALL1", "BEE1", "BELT1", "BITE1",
-    "BREAKFAST1", "CHRISTMAS1", "DARK1", "DEAF1", "DECIDE1", "DEMAND1",
-    "DEVELOP1", "DOG1", "EDIT1", "ELEVATOR1", "FINE1", "FLOAT1",
-    "HALLOWEEN1", "HURDLE/TRIP1", "LUNCH1", "MEAT1", "MECHANIC1",
-    "NOON1", "PARTY1", "PATIENT2", "RIVER1", "ROCKINGCHAIR1",
-    "SHAVE1", "WHATFOR1"
+    "5DOLLARS", "8HOUR", "ADDRESS", "ADVERTISE", "ALLOFSUDDEN", "ANYONE",
+    "APPLE", "ARTICULATESIGN", "ASSEMBLY", "AUTISM1", "AXE1", "BABY2",
+    "BACKOUT", "BACKPACK1", "BANDAGE", "BASEBALLCAP", "BASKET1", "BASKETBALL1",
+    "BATTERY", "BEARD", "BED2", "BEE1", "BELIEVE1", "BELT1", "BISON",
+    "BITE1", "BOTTLE", "BRAINSTORM", "BREAKFAST1", "BUBBLES", "BUCKLE1",
+    "CAKE", "CALENDAR1", "CANCER1", "CAPTURE", "CARDS", "CARVE", "CAT3",
+    "CATAPULT", "CATCH2", "CEMETERY", "CHEEK", "CHEER", "CHEESEGRATER",
+    "CHEW1", "CHRISTMAS1", "CLOCK2", "CLOSE", "COMB2", "CONFUSED1", "COPY",
+    "CORKSCREW1", "CROSS2", "CURTSEY1", "DARK1", "DAY", "DEAF1", "DECIDE1",
+    "DECORATE2", "DEMAND1", "DEVELOP1", "DINNER1", "DOG1", "DOWNLOAD",
+    "DOWNSIZE1", "DRAG1", "DRILL", "DROWN5", "DUCK2", "EACH", "EASY",
+    "EAT1", "EDIT1", "EITHER", "ELEVATOR1", "EMPTY2", "ENOUGH", "ERUPT2",
+    "FAIL", "FASCINATED", "FAST", "FEED1", "FILTER", "FINE1", "FLASHLIGHT4",
+    "FLIP", "FLOAT1", "FOLLOW1", "FOND", "FOOL", "FOREIGNER1", "FRACTION",
+    "GETINBED", "GLASS3", "GOODYGOODYSHOEOPPOSITE", "GRAMMAR", "GRENADE",
+    "GUESS1", "GUN2", "HAIRDRYER2", "HALLOWEEN1", "HARDOFHEARING",
+    "HELICOPTER2", "HELMET1", "HONOR", "HOPE", "HOSPITAL1", "HOW1",
+    "HURDLE/TRIP1", "IMAGINE2", "IMPOSSIBLE", "INEPT", "INTRODUCE",
+    "INTUITIVE", "ITALY", "JACKET3", "JEWELRY", "JEWISH", "JOKE", "JUMP",
+    "KICK2", "KNIGHT1", "LATER", "LETTUCE1", "LICKENVELOPE2", "LOAD2",
+    "LOCK1", "LOCK3", "LONGLINE", "LOSE", "LUNCH1", "MAGNET4", "MAGNIFY2",
+    "MAIL1", "MAPLE", "MEACULPA", "MEAT1", "MECHANIC1", "MEDITATE3",
+    "METAL", "METAPHOR", "MICROSCOPE1", "MICROSCOPE2", "MILK2", "MOUTH",
+    "MOVIE1", "MYSELF", "NAILCLIPPER", "NIGHT1", "NOON1", "NOTINTERESTED",
+    "OCTOPUS", "OFFEND", "OPENBOOK", "OTHER", "PARTY1", "PATIENT2", "PECK",
+    "PEEKABOO", "PEG2", "PEG3", "PENNY", "PICK", "PIPE2", "POLICEMAN2",
+    "PONDER", "POP3", "POP4", "PRESS", "PRICE", "PULLCONVINCE", "RABBIT2",
+    "RAZOR2", "RECENT1", "REGULAR", "RESEARCH1", "RHINO2", "RHINO3",
+    "RIGHT3", "RIVER1", "ROAST", "ROCKINGCHAIR1", "RUSSIA", "SAIL2",
+    "SAMESAME", "SCARF2", "SCOOP", "SCREWDRIVER3", "SCROLLDOWN", "SCULPTURE",
+    "SERVE1", "SHARK1", "SHARPEN2", "SHAVE1", "SHAVE3", "SHINY", "SHOCKED",
+    "SINCE", "SINK", "SKATEBOARDING3", "SKI", "SLICE1", "SLIDE2",
+    "SNOWBOARD", "SOCCER2", "SOCIETY", "SOMERSAULT1", "SOMERSAULT3",
+    "SPECIAL1", "SPILL2", "SQUEEZE", "STACK4", "STAMP3", "STETHOSCOPE2",
+    "STOP", "STRAIN1", "SUPERIOR", "SWEATER2", "SWEATPANTS", "SWEATSHIRT",
+    "TAIL1", "TEACH1", "THEY1", "THINK", "THIRD1", "TICKLE", "TIEUP2",
+    "TOMATO", "TRACTOR", "TRIANGLE", "TRIP1", "TWINS1", "TYPE1", "UNCLE",
+    "UNDERGRADUATE", "UNDERWEAR1", "VIEW", "VLOG", "VOICE", "VOMIT",
+    "WALK-TIGHTROPE-CL", "WANT1", "WASHMACHINE", "WHATFOR1", "WHILE",
+    "WHISTLE2", "WHOLE", "WINDMILL3", "WRISTWATCH3", "ZEBRA"
   ];
 
   @override
@@ -177,7 +215,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       _wordInterpreter = await Interpreter.fromAsset(
-        'assets/models/asl_alphabet_model.tflite',
+        'assets/models/asl_250_unrolled.tflite',
       );
       debugPrint("Word model loaded ✓");
     } catch (e) {
@@ -244,6 +282,9 @@ class _CameraScreenState extends State<CameraScreen> {
       isLastWasSpace = false;
     });
 
+    // ── CLEAR FRAME BUFFER ON MODE SWITCH (ADDED) ──
+    _frameBuffer.clear();
+
     // SPEAK MODE CHANGE
 
     if (isWordMode) {
@@ -268,7 +309,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
     setState(() { predictionLabel = "Running detection..."; });
     try {
-      _cameraController!.startImageStream(_onCameraFrame);
+      _cameraController!.startImageStream(_giFrame);
     } catch (e) {
       setState(() { predictionLabel = "Failed to start: $e"; });
     }
@@ -287,6 +328,79 @@ class _CameraScreenState extends State<CameraScreen> {
     Future.microtask(() async {
       if (!mounted) { isProcessingFrame = false; return; }
       try {
+
+        // ── WORD MODE ──────────────────────────────────────────────────────────
+        if (_detectionMode == DetectionMode.word) {
+          final rawLandmarks = await LandmarkService.extractRawLandmarks(image);
+
+          if (rawLandmarks == null) {
+            setState(() { predictionLabel = "No hand detected"; confidence = 0.0; });
+            return;
+          }
+
+          // Training layout: [left hand 0-62, right hand 63-125]
+          // We treat the detected hand as right (dominant hand)
+          final frame126 = List<double>.filled(126, 0.0);
+          for (int i = 0; i < 63; i++) {
+            frame126[63 + i] = rawLandmarks[i];
+          }
+
+          // Training normalization: subtract wrist (landmark 0) from each hand
+          // Left hand is all zeros → no change needed
+          // Right hand: subtract slots [63,64,65] (wrist x,y,z) from all 21 landmarks
+          final rwx = frame126[63];
+          final rwy = frame126[64];
+          final rwz = frame126[65];
+          for (int i = 0; i < 21; i++) {
+            frame126[63 + i * 3]     -= rwx;
+            frame126[63 + i * 3 + 1] -= rwy;
+            frame126[63 + i * 3 + 2] -= rwz;
+          }
+
+          _frameBuffer.add(frame126);
+          if (_frameBuffer.length > _wordSequenceLength) {
+            _frameBuffer.removeAt(0);
+          }
+
+          if (_frameBuffer.length < _wordSequenceLength) {
+            setState(() {
+              predictionLabel = "Buffering... ${_frameBuffer.length}/$_wordSequenceLength";
+            });
+            return;
+          }
+
+          // add_velocity: concatenate [raw(126), frame_delta(126)] = 252 per frame
+          // vel[0] = zeros (no previous frame), vel[i] = frame[i] - frame[i-1]
+          final List<List<double>> input252 = List.generate(_wordSequenceLength, (i) {
+            final vel = i == 0
+                ? List<double>.filled(126, 0.0)
+                : List.generate(126, (j) => _frameBuffer[i][j] - _frameBuffer[i - 1][j]);
+            return [..._frameBuffer[i], ...vel]; // 252 features
+          });
+
+          final wordInput      = [input252]; // shape: [1, 32, 252] ✓
+          final wordOutShape   = _interpreter!.getOutputTensor(0).shape;
+          final wordNumClasses = wordOutShape[1];
+          final wordOutput     = [List<double>.filled(wordNumClasses, 0.0)];
+
+          _interpreter!.run(wordInput, wordOutput);
+
+          final wordPredictions   = wordOutput[0];
+          final wordMaxIndex      = wordPredictions.indexOf(wordPredictions.reduce(max));
+          final wordMaxConfidence = wordPredictions[wordMaxIndex];
+          final wordNewPrediction = _labelEncoder.decode(wordMaxIndex);
+
+          if (mounted) {
+            setState(() {
+              predictionLabel = wordNewPrediction;
+              confidence      = wordMaxConfidence;
+            });
+            _handleWordPrediction(wordNewPrediction, wordMaxConfidence);
+          }
+          return;
+        }
+
+        // ── ALPHABET MODE (completely unchanged) ───────────────────────────────
         final landmarks = await LandmarkService.extractLandmarks(image);
 
         if (landmarks == null) {
@@ -311,12 +425,9 @@ class _CameraScreenState extends State<CameraScreen> {
             predictionLabel = newPrediction;
             confidence      = maxConfidence;
           });
-          if (_detectionMode == DetectionMode.word) {
-            _handleWordPrediction(newPrediction, maxConfidence);
-          } else {
-            _handleAlphabetPrediction(newPrediction, maxConfidence);
-          }
+          _handleAlphabetPrediction(newPrediction, maxConfidence);
         }
+
       } catch (e) {
         debugPrint('Inference error: $e');
       } finally {
@@ -324,7 +435,6 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     });
   }
-
   void _handleAlphabetPrediction(String newPrediction, double maxConfidence) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -371,7 +481,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void _handleWordPrediction(String newPrediction, double maxConfidence) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    if (maxConfidence < 0.7) return;
+    if (maxConfidence < 0.45) return;
     final now = DateTime.now();
     if (_isCooldown) return;
 
@@ -397,6 +507,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void stopDetection() async {
+    // ── CLEAR FRAME BUFFER ON STOP (ADDED) ──
+    _frameBuffer.clear();
+
     try {
       if (_cameraController != null &&
           _cameraController!.value.isStreamingImages) {

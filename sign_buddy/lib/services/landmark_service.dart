@@ -50,6 +50,22 @@ class LandmarkService {
       return null;
     }
   }
+  static Future<List<double>?> extractRawLandmarks(CameraImage image) async {
+    try {
+      final bytes  = _toNV21(image);
+      final result = await _channel.invokeMethod('detectLandmarks', {
+        'bytes':  bytes,
+        'width':  image.width,
+        'height': image.height,
+      });
+      if (result == null) return null;
+      final raw = List<double>.from(result);
+      if (raw.length != 63) return null;
+      return raw;
+    } catch (e) {
+      return null;
+    }
+  }
 
   static Uint8List _toNV21(CameraImage image) {
     final int width = image.width;
